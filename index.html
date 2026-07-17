@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Lokales Offline-Menü für Textbausteine">
+<meta name="description" content="Lokales Offline-Menü für Textbausteine und Kontakte">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>Snippet-Makro</title>
 <meta name="theme-color" content="#0e1015">
@@ -26,6 +26,7 @@
  .title{font-size:16px;font-weight:700;flex:1;letter-spacing:.2px}
  .tbtn{width:34px;height:34px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+ .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .tbtn:hover{background:var(--panel2);color:var(--text)}
  .tbtn.on{background:rgba(90,162,255,.16);color:#bcd9ff;border-color:rgba(90,162,255,.35)}
  .search{margin:0 14px 10px}
@@ -75,6 +76,30 @@
  .btn:hover{background:#2a303c}
  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:600}
  .btn.danger{color:#ff8f80}
+ .phoneModal{max-width:min(96vw,760px)}
+ .phoneTitlebar{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+ .phoneTitlebar h3{margin:0 0 3px}
+ .phoneTitlebar p{margin:0;color:var(--sub);font-size:12.5px}
+ .phoneTitlebar .btn{margin-left:auto;white-space:nowrap}
+ .contactCols,.contactRow{display:grid;grid-template-columns:minmax(130px,1.2fr) minmax(130px,1fr) minmax(100px,.8fr) 36px;gap:10px;align-items:center}
+ .contactCols{padding:0 12px 6px;color:var(--sub);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+ .contactsList{max-height:58vh;overflow-y:auto}
+ .contactRow{background:var(--card);border:1px solid transparent;border-radius:10px;padding:10px 12px;margin:6px 0}
+ .contactRow:hover{background:var(--cardh)}
+ .contactName{font-weight:600;overflow-wrap:anywhere}
+ .contactPhone{border:0;background:transparent;color:#bcd9ff;text-align:left;padding:4px 0;font:inherit;cursor:pointer;overflow-wrap:anywhere}
+ .contactPhone:hover{text-decoration:underline;color:#fff}
+ .contactPhone:disabled{color:var(--sub);cursor:default;text-decoration:none}
+ .contactCompany{color:var(--sub);font-size:13px;overflow-wrap:anywhere}
+ .contactEdit{width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--sub);cursor:pointer;font-size:15px}
+ .contactEdit:hover{background:var(--panel2);color:var(--text)}
+ @media(max-width:620px){
+   .head{gap:4px}.appLogo{display:none}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
+   .contactCols{display:none}
+   .contactRow{grid-template-columns:minmax(0,1fr) 36px;gap:4px 10px}
+   .contactName,.contactPhone,.contactCompany{grid-column:1}
+   .contactEdit{grid-column:2;grid-row:1/4}
+ }
  mark{background:rgba(90,162,255,.32);color:#eaf2ff;border-radius:3px;padding:0 1px;font-weight:600}
 </style></head>
 <body>
@@ -82,11 +107,14 @@
    <div class="head">
      <img class="appLogo" src="snippet-logo-192.png" alt="">
      <div class="title">Snippet-Makro</div>
+     <button class="tbtn" id="btnContacts" title="Telefonbuch" aria-label="Telefonbuch">
+       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
+     </button>
      <button class="tbtn" id="btnNew" title="Neuen Textbaustein anlegen">＋</button>
      <button class="tbtn" id="btnEdit" title="Bearbeitungsmodus">✎</button>
      <button class="tbtn" id="btnInstall" title="Als App installieren">⇩</button>
-     <button class="tbtn" id="btnExport" title="Textbausteine sichern (.json)">⤓</button>
-     <button class="tbtn" id="btnImport" title="Textbausteine importieren (.json)">⤒</button>
+     <button class="tbtn" id="btnExport" title="Alle Daten sichern (.json)">⤓</button>
+     <button class="tbtn" id="btnImport" title="Sicherung importieren (.json)">⤒</button>
      <input id="fileImport" type="file" accept="application/json,.json" style="display:none">
    </div>
    <div class="search"><input id="search" type="text" placeholder="Textbausteine durchsuchen …" spellcheck="false"></div>
@@ -114,8 +142,39 @@
    </div>
  </div>
 
+ <div class="ov" id="contactsOv">
+   <div class="modal phoneModal">
+     <div class="phoneTitlebar">
+       <div><h3>Telefonbuch</h3><p>Telefonnummer anklicken, um sie zu kopieren.</p></div>
+       <button class="btn primary" id="contactNew">＋ Kontakt</button>
+     </div>
+     <div class="contactCols"><span>Name</span><span>Telefonnummer</span><span>Firma</span><span></span></div>
+     <div class="contactsList" id="contactsList"></div>
+     <div class="acts"><div class="grow"></div><button class="btn" id="contactsClose">Schließen</button></div>
+   </div>
+ </div>
+
+ <div class="ov" id="contactEditOv">
+   <div class="modal" style="max-width:min(96vw,520px)">
+     <h3 id="contactEditTitle">Kontakt bearbeiten</h3>
+     <label for="contactName">Name</label>
+     <input id="contactName" type="text" autocomplete="off" spellcheck="false">
+     <label for="contactPhone">Telefonnummer</label>
+     <input id="contactPhone" type="tel" autocomplete="off" spellcheck="false">
+     <label for="contactCompany">Firma (optional)</label>
+     <input id="contactCompany" type="text" autocomplete="off" spellcheck="false">
+     <div class="acts">
+       <button class="btn primary" id="contactSave">Speichern</button>
+       <button class="btn danger" id="contactDelete">Löschen</button>
+       <div class="grow"></div>
+       <button class="btn" id="contactCancel">Abbrechen</button>
+     </div>
+   </div>
+ </div>
+
 <script>
 const KEY = 'snippetMenu.items.v1';
+const CONTACT_KEY = 'snippetMenu.contacts.v1';
 const FOLD = {};            // Ordner -> aufgeklappt
 let editMode = false;
 let editIndex = -1;         // -1 = neu
@@ -124,7 +183,10 @@ const DEFAULTS = [];
 
 function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)); if(Array.isArray(r)) return r; }catch(e){} return DEFAULTS.slice(); }
 function save(items){ localStorage.setItem(KEY, JSON.stringify(items)); }
+function loadContacts(){ try{ const r=JSON.parse(localStorage.getItem(CONTACT_KEY)); if(Array.isArray(r)) return r; }catch(e){} return []; }
+function saveContacts(contacts){ localStorage.setItem(CONTACT_KEY, JSON.stringify(contacts)); }
 let ITEMS = load();
+let CONTACTS = loadContacts();
 
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function preview(t){ return (t||'').replace(/\s+/g,' ').trim(); }
@@ -276,18 +338,84 @@ document.getElementById('btnNew').addEventListener('click', ()=>openEdit(-1));
 document.getElementById('btnEdit').addEventListener('click', function(){ editMode=!editMode; this.classList.toggle('on',editMode); toast(editMode?'Bearbeitungsmodus: Textbaustein anklicken':'Bearbeitungsmodus beendet', true); });
 document.getElementById('search').addEventListener('input', render);
 
+/* Telefonbuch */
+let contactEditIndex=-1;
+function renderContacts(){
+  const list=document.getElementById('contactsList'); list.innerHTML='';
+  if(!CONTACTS.length){ list.innerHTML='<div class="empty">Noch keine Kontakte.<br>Mit „＋ Kontakt“ den ersten Eintrag anlegen.</div>'; return; }
+  CONTACTS.forEach((contact,index)=>{
+    const row=document.createElement('div'); row.className='contactRow';
+    const name=document.createElement('div'); name.className='contactName'; name.textContent=contact.name||'—';
+    const phone=document.createElement('button'); phone.className='contactPhone'; phone.type='button'; phone.textContent=contact.phone||'—'; phone.disabled=!contact.phone;
+    phone.title=contact.phone?'Telefonnummer kopieren':'';
+    phone.addEventListener('click',async ()=>{ const ok=await copyText(contact.phone); toast(ok?'Telefonnummer kopiert':'Kopieren fehlgeschlagen',ok); });
+    const company=document.createElement('div'); company.className='contactCompany'; company.textContent=contact.company||'—';
+    const edit=document.createElement('button'); edit.className='contactEdit'; edit.type='button'; edit.title='Kontakt bearbeiten'; edit.setAttribute('aria-label','Kontakt bearbeiten'); edit.textContent='✎';
+    edit.addEventListener('click',()=>openContactEdit(index));
+    row.append(name,phone,company,edit); list.appendChild(row);
+  });
+}
+function openContacts(){ renderContacts(); document.getElementById('contactsOv').classList.add('show'); }
+function closeContacts(){ document.getElementById('contactsOv').classList.remove('show'); }
+function openContactEdit(index){
+  contactEditIndex=index;
+  const contact=index>=0?CONTACTS[index]:{name:'',phone:'',company:''};
+  document.getElementById('contactEditTitle').textContent=index>=0?'Kontakt bearbeiten':'Neuer Kontakt';
+  document.getElementById('contactName').value=contact.name||'';
+  document.getElementById('contactPhone').value=contact.phone||'';
+  document.getElementById('contactCompany').value=contact.company||'';
+  document.getElementById('contactDelete').style.display=index>=0?'':'none';
+  document.getElementById('contactEditOv').classList.add('show');
+  setTimeout(()=>document.getElementById('contactName').focus(),30);
+}
+function closeContactEdit(){ document.getElementById('contactEditOv').classList.remove('show'); }
+document.getElementById('btnContacts').addEventListener('click',openContacts);
+document.getElementById('contactsClose').addEventListener('click',closeContacts);
+document.getElementById('contactNew').addEventListener('click',()=>openContactEdit(-1));
+document.getElementById('contactCancel').addEventListener('click',closeContactEdit);
+document.getElementById('contactsOv').addEventListener('click',e=>{ if(e.target.id==='contactsOv') closeContacts(); });
+document.getElementById('contactEditOv').addEventListener('click',e=>{ if(e.target.id==='contactEditOv') closeContactEdit(); });
+document.getElementById('contactSave').addEventListener('click',()=>{
+  const name=document.getElementById('contactName').value.trim();
+  const phone=document.getElementById('contactPhone').value.trim();
+  if(!name){ document.getElementById('contactName').focus(); return; }
+  if(!phone){ document.getElementById('contactPhone').focus(); return; }
+  const contact={name,phone,company:document.getElementById('contactCompany').value.trim()};
+  if(contactEditIndex>=0) CONTACTS[contactEditIndex]=contact; else CONTACTS.push(contact);
+  saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast('Kontakt gespeichert',true);
+});
+document.getElementById('contactDelete').addEventListener('click',()=>{
+  if(contactEditIndex>=0 && confirm('Diesen Kontakt wirklich löschen?')){
+    CONTACTS.splice(contactEditIndex,1); saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast('Kontakt gelöscht',true);
+  }
+});
+
 /* Export und Import */
 document.getElementById('btnExport').addEventListener('click', ()=>{
-  const blob=new Blob([JSON.stringify(ITEMS,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='snippets.json'; a.click();
+  const data={version:2,snippets:ITEMS,contacts:CONTACTS};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='snippet-makro-backup.json'; a.click();
 });
 document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('fileImport').click());
 document.getElementById('fileImport').addEventListener('change', e=>{
   const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=()=>{ try{ const arr=JSON.parse(r.result); if(Array.isArray(arr)){ ITEMS=arr; save(ITEMS); render(); toast('Importiert',true);} else toast('Ungültige Datei',false);}catch(_){toast('Ungültige Datei',false);} };
+  const r=new FileReader(); r.onload=()=>{ try{
+    const data=JSON.parse(r.result);
+    if(Array.isArray(data)){
+      ITEMS=data; save(ITEMS); render(); toast('Alte Snippet-Sicherung importiert',true);
+    }else if(data && Array.isArray(data.snippets) && (data.contacts===undefined || Array.isArray(data.contacts))){
+      ITEMS=data.snippets; save(ITEMS);
+      if(Array.isArray(data.contacts)){ CONTACTS=data.contacts; saveContacts(CONTACTS); }
+      render(); renderContacts(); toast('Sicherung importiert',true);
+    }else toast('Ungültige Datei',false);
+  }catch(_){toast('Ungültige Datei',false);} };
   r.readAsText(f); e.target.value='';
 });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeEdit(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
+  if(document.getElementById('contactEditOv').classList.contains('show')) closeContactEdit();
+  else if(document.getElementById('contactsOv').classList.contains('show')) closeContacts();
+  else closeEdit();
+} });
 
 // Ablegen auf der freien Listenfläche verschiebt den Eintrag aus dem Ordner heraus
 const listEl=document.getElementById('list');

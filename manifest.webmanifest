@@ -1,7 +1,7 @@
 {
   "name": "Snippet-Makro",
   "short_name": "Snippets",
-  "description": "Lokales Offline-Menü für Textbausteine",
+  "description": "Lokales Offline-Menü für Textbausteine und Kontakte",
   "id": "./",
   "start_url": "./",
   "scope": "./",
