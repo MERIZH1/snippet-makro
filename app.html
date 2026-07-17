@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lokales Offline-Menü für Textbausteine und Kontakte">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<script>
+ if(!window.matchMedia('(display-mode: standalone)').matches &&
+    window.navigator.standalone!==true &&
+    new URLSearchParams(window.location.search).get('preview')!=='1'){
+   window.location.replace('./');
+ }
+</script>
+<title>Snippet-Makro</title>
+<meta name="theme-color" content="#0e1015">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./snippet-logo-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./snippet-logo-192.png">
+<style>
+ :root{
+   --bg:#0e1015; --panel:#1b1f27; --panel2:#20242e; --card:#262b36; --cardh:#2f3542;
+   --line:#313846; --text:#eef1f6; --sub:#98a2b3; --accent:#5aa2ff; --accent2:#7c5cff;
+   --fold:#233047; --foldt:#b9d0ff; --ok:#43d17a;
+ }
+ *{box-sizing:border-box}
+ html,body{margin:0;height:100%}
+ body{background:radial-gradient(900px 500px at 15% -10%,rgba(90,162,255,.10),transparent 60%),var(--bg);
+   color:var(--text);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;
+   display:flex;justify-content:center;padding:22px 14px;-webkit-font-smoothing:antialiased}
+ .panel{width:100%;max-width:460px;background:linear-gradient(180deg,var(--panel),#161a21);
+   border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 44px)}
+ .head{display:flex;align-items:center;gap:8px;padding:14px 14px 10px}
+ .appLogo{width:34px;height:34px;border-radius:9px;flex:none;box-shadow:0 5px 14px rgba(255,35,94,.3)}
+ .title{font-size:16px;font-weight:700;flex:1;letter-spacing:.2px}
+ .tbtn{width:34px;height:34px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
+   font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+ .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ .tbtn:hover{background:var(--panel2);color:var(--text)}
+ .tbtn.on{background:rgba(90,162,255,.16);color:#bcd9ff;border-color:rgba(90,162,255,.35)}
+ .search{margin:0 14px 10px}
+ .search input{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);
+   padding:9px 12px;font-size:14px;outline:none}
+ .search input:focus{border-color:var(--accent)}
+ .list{overflow-y:auto;padding:2px 10px 12px}
+ .list::-webkit-scrollbar{width:10px}
+ .list::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--panel)}
+ .row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:11px;padding:11px 12px;margin:6px 4px;cursor:pointer;border:1px solid transparent}
+ .row:hover{background:var(--cardh)}
+ .row .accent{width:3px;height:20px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent2));flex:none;opacity:.9}
+ .row .nm{flex:1;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .row .pv{color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+ .row .pen{color:var(--sub);font-size:14px;opacity:0;padding:0 2px}
+ .row:hover .pen{opacity:.7}
+ .fold{margin:8px 4px 2px}
+ .foldhead{display:flex;align-items:center;gap:8px;background:var(--fold);color:var(--foldt);border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:600;font-size:14px}
+ .foldhead:hover{filter:brightness(1.08)}
+ .foldhead .arw{font-size:12px;width:12px}
+ .indent{margin-left:16px}
+ .empty{color:var(--sub);text-align:center;padding:26px 10px;font-size:13.5px}
+ .row.dragging{opacity:.4}
+ .row.dropbefore{box-shadow:inset 0 3px 0 var(--accent)}
+ .row.dropafter{box-shadow:inset 0 -3px 0 var(--accent)}
+ .foldhead.dropinto{outline:2px solid var(--accent);outline-offset:-2px}
+ .row .grip{color:var(--sub);opacity:.35;font-size:13px;cursor:grab}
+ .row:hover .grip{opacity:.7}
+ .foot{padding:8px 16px 12px;color:var(--sub);font-size:11.5px;border-top:1px solid var(--line)}
+ /* toast */
+ .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;
+   background:#12351f;border:1px solid #2f7a4a;color:#c7f5d6;padding:10px 16px;border-radius:11px;font-size:13.5px;font-weight:600;
+   transition:opacity .18s, transform .18s;pointer-events:none;z-index:50}
+ .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+ /* modal */
+ .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;z-index:60;padding:16px;overflow-y:auto}
+ .ov.show{display:flex}
+ .modal{width:100%;max-width:min(96vw,900px);margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+ .modal h3{margin:0 0 12px;font-size:16px}
+ .modal label{display:block;font-size:12px;color:var(--sub);margin:10px 0 4px}
+ .modal input,.modal textarea{width:100%;background:#12151b;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:14px;outline:none}
+ .modal input:focus,.modal textarea:focus{border-color:var(--accent)}
+ .modal textarea{min-height:260px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden;overflow-y:hidden;font-family:'Cascadia Mono',Consolas,monospace;font-size:13px;line-height:1.45}
+ .acts{display:flex;gap:8px;margin-top:16px}
+ .acts .grow{flex:1}
+ .btn{padding:9px 15px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:13.5px;cursor:pointer;font-family:inherit}
+ .btn:hover{background:#2a303c}
+ .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:600}
+ .btn.danger{color:#ff8f80}
+ .phoneModal{max-width:min(96vw,760px)}
+ .phoneTitlebar{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+ .phoneTitlebar h3{margin:0 0 3px}
+ .phoneTitlebar p{margin:0;color:var(--sub);font-size:12.5px}
+ .phoneTitlebar .btn{margin-left:auto;white-space:nowrap}
+ .contactCols,.contactRow{display:grid;grid-template-columns:minmax(130px,1.2fr) minmax(130px,1fr) minmax(100px,.8fr) 36px;gap:10px;align-items:center}
+ .contactCols{padding:0 12px 6px;color:var(--sub);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+ .contactsList{max-height:58vh;overflow-y:auto}
+ .contactRow{background:var(--card);border:1px solid transparent;border-radius:10px;padding:10px 12px;margin:6px 0}
+ .contactRow:hover{background:var(--cardh)}
+ .contactName{font-weight:600;overflow-wrap:anywhere}
+ .contactPhone{border:0;background:transparent;color:#bcd9ff;text-align:left;padding:4px 0;font:inherit;cursor:pointer;overflow-wrap:anywhere}
+ .contactPhone:hover{text-decoration:underline;color:#fff}
+ .contactPhone:disabled{color:var(--sub);cursor:default;text-decoration:none}
+ .contactCompany{color:var(--sub);font-size:13px;overflow-wrap:anywhere}
+ .contactEdit{width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--sub);cursor:pointer;font-size:15px}
+ .contactEdit:hover{background:var(--panel2);color:var(--text)}
+ @media(max-width:620px){
+   .head{gap:4px}.appLogo{display:none}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
+   .contactCols{display:none}
+   .contactRow{grid-template-columns:minmax(0,1fr) 36px;gap:4px 10px}
+   .contactName,.contactPhone,.contactCompany{grid-column:1}
+   .contactEdit{grid-column:2;grid-row:1/4}
+ }
+ mark{background:rgba(90,162,255,.32);color:#eaf2ff;border-radius:3px;padding:0 1px;font-weight:600}
+</style></head>
+<body>
+ <div class="panel">
+   <div class="head">
+     <img class="appLogo" src="snippet-logo-192.png" alt="">
+     <div class="title">Snippet-Makro</div>
+     <button class="tbtn" id="btnContacts" title="Telefonbuch" aria-label="Telefonbuch">
+       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
+     </button>
+     <button class="tbtn" id="btnNew" title="Neuen Textbaustein anlegen">＋</button>
+     <button class="tbtn" id="btnEdit" title="Bearbeitungsmodus">✎</button>
+     <button class="tbtn" id="btnInstall" title="Als App installieren">⇩</button>
+     <button class="tbtn" id="btnExport" title="Alle Daten sichern (.json)">⤓</button>
+     <button class="tbtn" id="btnImport" title="Sicherung importieren (.json)">⤒</button>
+     <input id="fileImport" type="file" accept="application/json,.json" style="display:none">
+   </div>
+   <div class="search"><input id="search" type="text" placeholder="Textbausteine durchsuchen …" spellcheck="false"></div>
+   <div class="list" id="list"></div>
+   <div class="foot">Klick → kopiert → mit <b style="color:#cfe0ff">Strg+V</b> einfügen. &nbsp;•&nbsp; Mit <b>⠿</b> sortieren.</div>
+ </div>
+
+ <div class="toast" id="toast">✓ Kopiert – jetzt Strg+V drücken</div>
+
+ <div class="ov" id="ov">
+   <div class="modal">
+     <h3 id="mTitle">Textbaustein bearbeiten</h3>
+     <label>Name</label>
+     <input id="mName" type="text" spellcheck="false">
+     <label>Ordner (leer = kein Ordner)</label>
+     <input id="mFolder" type="text" spellcheck="false">
+     <label>Text</label>
+     <textarea id="mText" spellcheck="false"></textarea>
+     <div class="acts">
+       <button class="btn primary" id="mSave">Speichern</button>
+       <button class="btn danger" id="mDelete">Löschen</button>
+       <div class="grow"></div>
+       <button class="btn" id="mCancel">Abbrechen</button>
+     </div>
+   </div>
+ </div>
+
+ <div class="ov" id="contactsOv">
+   <div class="modal phoneModal">
+     <div class="phoneTitlebar">
+       <div><h3>Telefonbuch</h3><p>Telefonnummer anklicken, um sie zu kopieren.</p></div>
+       <button class="btn primary" id="contactNew">＋ Kontakt</button>
+     </div>
+     <div class="contactCols"><span>Name</span><span>Telefonnummer</span><span>Firma</span><span></span></div>
+     <div class="contactsList" id="contactsList"></div>
+     <div class="acts"><div class="grow"></div><button class="btn" id="contactsClose">Schließen</button></div>
+   </div>
+ </div>
+
+ <div class="ov" id="contactEditOv">
+   <div class="modal" style="max-width:min(96vw,520px)">
+     <h3 id="contactEditTitle">Kontakt bearbeiten</h3>
+     <label for="contactName">Name</label>
+     <input id="contactName" type="text" autocomplete="off" spellcheck="false">
+     <label for="contactPhone">Telefonnummer</label>
+     <input id="contactPhone" type="tel" autocomplete="off" spellcheck="false">
+     <label for="contactCompany">Firma (optional)</label>
+     <input id="contactCompany" type="text" autocomplete="off" spellcheck="false">
+     <div class="acts">
+       <button class="btn primary" id="contactSave">Speichern</button>
+       <button class="btn danger" id="contactDelete">Löschen</button>
+       <div class="grow"></div>
+       <button class="btn" id="contactCancel">Abbrechen</button>
+     </div>
+   </div>
+ </div>
+
+<script>
+const KEY = 'snippetMenu.items.v1';
+const CONTACT_KEY = 'snippetMenu.contacts.v1';
+const FOLD = {};            // Ordner -> aufgeklappt
+let editMode = false;
+let editIndex = -1;         // -1 = neu
+
+const DEFAULTS = [];
+
+function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)); if(Array.isArray(r)) return r; }catch(e){} return DEFAULTS.slice(); }
+function save(items){ localStorage.setItem(KEY, JSON.stringify(items)); }
+function loadContacts(){ try{ const r=JSON.parse(localStorage.getItem(CONTACT_KEY)); if(Array.isArray(r)) return r; }catch(e){} return []; }
+function saveContacts(contacts){ localStorage.setItem(CONTACT_KEY, JSON.stringify(contacts)); }
+let ITEMS = load();
+let CONTACTS = loadContacts();
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function preview(t){ return (t||'').replace(/\s+/g,' ').trim(); }
+function highlight(s,q){ const t=String(s==null?'':s); if(!q) return esc(t);
+  let out='', rest=t; const ql=q.length;
+  while(true){ const k=rest.toLowerCase().indexOf(q); if(k<0){ out+=esc(rest); break; }
+    out+=esc(rest.slice(0,k))+'<mark>'+esc(rest.slice(k,k+ql))+'</mark>'; rest=rest.slice(k+ql); }
+  return out; }
+
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){
+    try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }
+    catch(_){ return false; }
+  }
+}
+let toastT;
+function toast(msg, ok){
+  const el=document.getElementById('toast'); el.textContent=(ok?'✓ ':'⚠ ')+msg;
+  el.style.background = ok? '#12351f':'#3a1f12'; el.style.borderColor= ok? '#2f7a4a':'#7a4a2f'; el.style.color= ok? '#c7f5d6':'#f5d9c7';
+  el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'), 1600);
+}
+
+let dragItem=null;
+function moveBeside(target, after){
+  if(!dragItem || dragItem===target) return;
+  const di=ITEMS.indexOf(dragItem); if(di<0) return;
+  ITEMS.splice(di,1);
+  dragItem.folder = target.folder||'';
+  let ti=ITEMS.indexOf(target);
+  ITEMS.splice(after? ti+1 : ti, 0, dragItem);
+  save(ITEMS); render();
+}
+function moveToFolder(f){
+  if(!dragItem) return;
+  const di=ITEMS.indexOf(dragItem); if(di<0) return;
+  ITEMS.splice(di,1);
+  dragItem.folder = f;
+  let last=-1; ITEMS.forEach((it,i)=>{ if((it.folder||'').trim()===f) last=i; });
+  ITEMS.splice(last>=0? last+1 : ITEMS.length, 0, dragItem);
+  if(f) FOLD[f]=true;
+  save(ITEMS); render();
+}
+
+function rowEl(it, idx, indent, canDrag, q){
+  const row=document.createElement('div'); row.className='row'+(indent?' indent':'');
+  row.innerHTML='<div class="accent"></div><div class="nm">'+highlight(it.name,q)+'</div>'+
+                (canDrag?'<div class="grip" title="Verschieben oder in einen Ordner ziehen">⠿</div>':'<div class="pen">✎</div>');
+  row.addEventListener('click', async (e)=>{
+    if(e.target.classList.contains('grip')) return;
+    if(editMode){ openEdit(idx); return; }
+    const ok=await copyText(it.text);
+    toast(ok?'Kopiert – jetzt Strg+V drücken':'Kopieren fehlgeschlagen', ok);
+  });
+  if(canDrag){
+    row.draggable=true;
+    row.addEventListener('dragstart', e=>{ dragItem=it; row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; try{e.dataTransfer.setData('text/plain','x');}catch(_){}} );
+    row.addEventListener('dragend', ()=>{ dragItem=null; row.classList.remove('dragging'); });
+    row.addEventListener('dragover', e=>{ if(!dragItem||dragItem===it) return; e.preventDefault(); e.dataTransfer.dropEffect='move';
+      const r=row.getBoundingClientRect(); const after=(e.clientY-r.top)>r.height/2;
+      row.classList.toggle('dropafter',after); row.classList.toggle('dropbefore',!after); });
+    row.addEventListener('dragleave', ()=> row.classList.remove('dropbefore','dropafter'));
+    row.addEventListener('drop', e=>{ if(!dragItem) return; e.preventDefault(); e.stopPropagation();
+      const r=row.getBoundingClientRect(); const after=(e.clientY-r.top)>r.height/2;
+      row.classList.remove('dropbefore','dropafter'); moveBeside(it, after); });
+  }
+  return row;
+}
+
+function render(){
+  const list=document.getElementById('list'); list.innerHTML='';
+  const q=document.getElementById('search').value.trim().toLowerCase();
+
+  // Suche: Treffer nach Ordner gruppieren und Suchwort im Titel hervorheben
+  if(q){
+    const hits=ITEMS.map((it,i)=>({it,i})).filter(o=> (o.it.name+' '+o.it.text+' '+(o.it.folder||'')).toLowerCase().includes(q));
+    if(!hits.length){ list.innerHTML='<div class="empty">Keine Treffer.</div>'; return; }
+    const groups=new Map();
+    hits.forEach(o=>{ const f=(o.it.folder||'').trim(); if(!groups.has(f)) groups.set(f,[]); groups.get(f).push(o); });
+    (groups.get('')||[]).forEach(o=> list.appendChild(rowEl(o.it,o.i,false,false,q)));
+    groups.forEach((arr,f)=>{ if(!f) return;
+      const wrap=document.createElement('div'); wrap.className='fold';
+      const head=document.createElement('div'); head.className='foldhead';
+      head.innerHTML='<span class="arw">▾</span><span>'+highlight(f,q)+'</span>';
+      wrap.appendChild(head); list.appendChild(wrap);
+      arr.forEach(o=> list.appendChild(rowEl(o.it,o.i,true,false,q)));
+    });
+    return;
+  }
+
+  if(!ITEMS.length){ list.innerHTML='<div class="empty">Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⤒ importieren.</div>'; return; }
+
+  // Textbausteine ohne Ordner
+  ITEMS.forEach((it,i)=>{ if(!(it.folder||'').trim()) list.appendChild(rowEl(it,i,false,true)); });
+  // Ordner
+  const folders=[];
+  ITEMS.forEach(it=>{ const f=(it.folder||'').trim(); if(f && !folders.includes(f)) folders.push(f); });
+  folders.forEach(f=>{
+    if(!(f in FOLD)) FOLD[f]=false;
+    const wrap=document.createElement('div'); wrap.className='fold';
+    const head=document.createElement('div'); head.className='foldhead';
+    head.innerHTML='<span class="arw">'+(FOLD[f]?'▾':'▸')+'</span><span>'+esc(f)+'</span>';
+    head.addEventListener('click', ()=>{ FOLD[f]=!FOLD[f]; render(); });
+    head.addEventListener('dragover', e=>{ if(!dragItem) return; e.preventDefault(); e.dataTransfer.dropEffect='move'; head.classList.add('dropinto'); });
+    head.addEventListener('dragleave', ()=> head.classList.remove('dropinto'));
+    head.addEventListener('drop', e=>{ if(!dragItem) return; e.preventDefault(); e.stopPropagation(); head.classList.remove('dropinto'); moveToFolder(f); });
+    wrap.appendChild(head); list.appendChild(wrap);
+    if(FOLD[f]) ITEMS.forEach((it,i)=>{ if((it.folder||'').trim()===f) list.appendChild(rowEl(it,i,true,true)); });
+  });
+}
+
+/* Bearbeiten */
+function fitTextEditor(){
+  const el=document.getElementById('mText');
+  el.style.height='auto';
+  el.style.height=Math.max(260,el.scrollHeight+2)+'px';
+}
+function openEdit(idx){
+  editIndex=idx;
+  const it = idx>=0 ? ITEMS[idx] : {name:'',folder:'',text:''};
+  document.getElementById('mTitle').textContent = idx>=0?'Textbaustein bearbeiten':'Neuer Textbaustein';
+  document.getElementById('mName').value=it.name||'';
+  document.getElementById('mFolder').value=it.folder||'';
+  document.getElementById('mText').value=it.text||'';
+  document.getElementById('mDelete').style.display = idx>=0?'':'none';
+  document.getElementById('ov').classList.add('show');
+  fitTextEditor();
+  setTimeout(()=>document.getElementById('mName').focus(),30);
+}
+function closeEdit(){ document.getElementById('ov').classList.remove('show'); }
+
+document.getElementById('mSave').addEventListener('click', ()=>{
+  const name=document.getElementById('mName').value.trim();
+  if(!name){ document.getElementById('mName').focus(); return; }
+  const obj={name, folder:document.getElementById('mFolder').value.trim(), text:document.getElementById('mText').value};
+  if(editIndex>=0) ITEMS[editIndex]=obj; else ITEMS.push(obj);
+  save(ITEMS); closeEdit(); render();
+});
+document.getElementById('mDelete').addEventListener('click', ()=>{
+  if(editIndex>=0 && confirm('Diesen Textbaustein wirklich löschen?')){ ITEMS.splice(editIndex,1); save(ITEMS); closeEdit(); render(); }
+});
+document.getElementById('mCancel').addEventListener('click', closeEdit);
+document.getElementById('ov').addEventListener('click', e=>{ if(e.target.id==='ov') closeEdit(); });
+document.getElementById('mText').addEventListener('input', fitTextEditor);
+window.addEventListener('resize', ()=>{ if(document.getElementById('ov').classList.contains('show')) fitTextEditor(); });
+
+document.getElementById('btnNew').addEventListener('click', ()=>openEdit(-1));
+document.getElementById('btnEdit').addEventListener('click', function(){ editMode=!editMode; this.classList.toggle('on',editMode); toast(editMode?'Bearbeitungsmodus: Textbaustein anklicken':'Bearbeitungsmodus beendet', true); });
+document.getElementById('search').addEventListener('input', render);
+
+/* Telefonbuch */
+let contactEditIndex=-1;
+function renderContacts(){
+  const list=document.getElementById('contactsList'); list.innerHTML='';
+  if(!CONTACTS.length){ list.innerHTML='<div class="empty">Noch keine Kontakte.<br>Mit „＋ Kontakt“ den ersten Eintrag anlegen.</div>'; return; }
+  CONTACTS.forEach((contact,index)=>{
+    const row=document.createElement('div'); row.className='contactRow';
+    const name=document.createElement('div'); name.className='contactName'; name.textContent=contact.name||'—';
+    const phone=document.createElement('button'); phone.className='contactPhone'; phone.type='button'; phone.textContent=contact.phone||'—'; phone.disabled=!contact.phone;
+    phone.title=contact.phone?'Telefonnummer kopieren':'';
+    phone.addEventListener('click',async ()=>{ const ok=await copyText(contact.phone); toast(ok?'Telefonnummer kopiert':'Kopieren fehlgeschlagen',ok); });
+    const company=document.createElement('div'); company.className='contactCompany'; company.textContent=contact.company||'—';
+    const edit=document.createElement('button'); edit.className='contactEdit'; edit.type='button'; edit.title='Kontakt bearbeiten'; edit.setAttribute('aria-label','Kontakt bearbeiten'); edit.textContent='✎';
+    edit.addEventListener('click',()=>openContactEdit(index));
+    row.append(name,phone,company,edit); list.appendChild(row);
+  });
+}
+function openContacts(){ renderContacts(); document.getElementById('contactsOv').classList.add('show'); }
+function closeContacts(){ document.getElementById('contactsOv').classList.remove('show'); }
+function openContactEdit(index){
+  contactEditIndex=index;
+  const contact=index>=0?CONTACTS[index]:{name:'',phone:'',company:''};
+  document.getElementById('contactEditTitle').textContent=index>=0?'Kontakt bearbeiten':'Neuer Kontakt';
+  document.getElementById('contactName').value=contact.name||'';
+  document.getElementById('contactPhone').value=contact.phone||'';
+  document.getElementById('contactCompany').value=contact.company||'';
+  document.getElementById('contactDelete').style.display=index>=0?'':'none';
+  document.getElementById('contactEditOv').classList.add('show');
+  setTimeout(()=>document.getElementById('contactName').focus(),30);
+}
+function closeContactEdit(){ document.getElementById('contactEditOv').classList.remove('show'); }
+document.getElementById('btnContacts').addEventListener('click',openContacts);
+document.getElementById('contactsClose').addEventListener('click',closeContacts);
+document.getElementById('contactNew').addEventListener('click',()=>openContactEdit(-1));
+document.getElementById('contactCancel').addEventListener('click',closeContactEdit);
+document.getElementById('contactsOv').addEventListener('click',e=>{ if(e.target.id==='contactsOv') closeContacts(); });
+document.getElementById('contactEditOv').addEventListener('click',e=>{ if(e.target.id==='contactEditOv') closeContactEdit(); });
+document.getElementById('contactSave').addEventListener('click',()=>{
+  const name=document.getElementById('contactName').value.trim();
+  const phone=document.getElementById('contactPhone').value.trim();
+  if(!name){ document.getElementById('contactName').focus(); return; }
+  if(!phone){ document.getElementById('contactPhone').focus(); return; }
+  const contact={name,phone,company:document.getElementById('contactCompany').value.trim()};
+  if(contactEditIndex>=0) CONTACTS[contactEditIndex]=contact; else CONTACTS.push(contact);
+  saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast('Kontakt gespeichert',true);
+});
+document.getElementById('contactDelete').addEventListener('click',()=>{
+  if(contactEditIndex>=0 && confirm('Diesen Kontakt wirklich löschen?')){
+    CONTACTS.splice(contactEditIndex,1); saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast('Kontakt gelöscht',true);
+  }
+});
+
+/* Export und Import */
+document.getElementById('btnExport').addEventListener('click', ()=>{
+  const data={version:2,snippets:ITEMS,contacts:CONTACTS};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='snippet-makro-backup.json'; a.click();
+});
+document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('fileImport').click());
+document.getElementById('fileImport').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ try{
+    const data=JSON.parse(r.result);
+    if(Array.isArray(data)){
+      ITEMS=data; save(ITEMS); render(); toast('Alte Snippet-Sicherung importiert',true);
+    }else if(data && Array.isArray(data.snippets) && (data.contacts===undefined || Array.isArray(data.contacts))){
+      ITEMS=data.snippets; save(ITEMS);
+      if(Array.isArray(data.contacts)){ CONTACTS=data.contacts; saveContacts(CONTACTS); }
+      render(); renderContacts(); toast('Sicherung importiert',true);
+    }else toast('Ungültige Datei',false);
+  }catch(_){toast('Ungültige Datei',false);} };
+  r.readAsText(f); e.target.value='';
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
+  if(document.getElementById('contactEditOv').classList.contains('show')) closeContactEdit();
+  else if(document.getElementById('contactsOv').classList.contains('show')) closeContacts();
+  else closeEdit();
+} });
+
+// Ablegen auf der freien Listenfläche verschiebt den Eintrag aus dem Ordner heraus
+const listEl=document.getElementById('list');
+listEl.addEventListener('dragover', e=>{ if(dragItem) e.preventDefault(); });
+listEl.addEventListener('drop', e=>{ if(dragItem){ e.preventDefault(); moveToFolder(''); } });
+
+let installPrompt=null;
+const installButton=document.getElementById('btnInstall');
+window.addEventListener('beforeinstallprompt', event=>{
+  event.preventDefault();
+  installPrompt=event;
+  installButton.classList.add('on');
+});
+window.addEventListener('appinstalled', ()=>{
+  installPrompt=null;
+  installButton.style.display='none';
+  toast('App wurde installiert',true);
+});
+installButton.addEventListener('click', async ()=>{
+  if(installPrompt){
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt=null;
+    installButton.classList.remove('on');
+  }else{
+    toast('In Edge: ⋯ → Apps → Diese Website als App installieren',true);
+  }
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', async ()=>{
+    try{
+      await navigator.serviceWorker.register('./sw.js');
+      await navigator.serviceWorker.ready;
+    }catch(_){}
+  });
+}
+
+render();
+</script>
+</body></html>

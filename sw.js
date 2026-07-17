@@ -1,7 +1,8 @@
-const CACHE_NAME = 'snippet-makro-v3';
+const CACHE_NAME = 'snippet-makro-v4';
 const APP_SHELL = [
   './',
   './index.html',
+  './app.html',
   './manifest.webmanifest',
   './snippet-logo-192.png',
   './snippet-logo-512.png'
@@ -35,16 +36,17 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
+    const fallbackPage = url.pathname.endsWith('/app.html') ? './app.html' : './index.html';
     event.respondWith(
       fetch(request)
         .then(response => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(fallbackPage, copy));
           return response;
         })
         .catch(async () =>
           (await caches.match(request)) ||
-          (await caches.match('./index.html')) ||
+          (await caches.match(fallbackPage)) ||
           (await caches.match('./'))
         )
     );
