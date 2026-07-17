@@ -119,7 +119,7 @@
    </div>
    <div class="search"><input id="search" type="text" placeholder="Textbausteine durchsuchen …" spellcheck="false"></div>
    <div class="list" id="list"></div>
-   <div class="foot">Klick → kopiert → mit <b style="color:#cfe0ff">Strg+V</b> einfügen. &nbsp;•&nbsp; Mit <b>⠿</b> sortieren. &nbsp;•&nbsp; Daten bleiben in diesem Browser. <span id="pwaStatus">Offline-Funktion wird vorbereitet …</span></div>
+   <div class="foot">Klick → kopiert → mit <b style="color:#cfe0ff">Strg+V</b> einfügen. &nbsp;•&nbsp; Mit <b>⠿</b> sortieren.</div>
  </div>
 
  <div class="toast" id="toast">✓ Kopiert – jetzt Strg+V drücken</div>
@@ -450,13 +450,8 @@ if('serviceWorker' in navigator){
     try{
       await navigator.serviceWorker.register('./sw.js');
       await navigator.serviceWorker.ready;
-      document.getElementById('pwaStatus').textContent='Offline bereit.';
-    }catch(_){
-      document.getElementById('pwaStatus').textContent='Offline-Funktion konnte nicht geladen werden.';
-    }
+    }catch(_){}
   });
-}else{
-  document.getElementById('pwaStatus').textContent='Dieser Browser unterstützt keine Offline-App.';
 }
 
 render();
