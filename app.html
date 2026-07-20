@@ -19,7 +19,7 @@
  :root{
    --bg:#0e1015; --panel:#1b1f27; --panel2:#20242e; --card:#262b36; --cardh:#2f3542;
    --line:#313846; --text:#eef1f6; --sub:#98a2b3; --accent:#5aa2ff; --accent2:#7c5cff;
-   --fold:#233047; --foldt:#b9d0ff; --ok:#43d17a;
+   --fold:#233047; --foldt:#b9d0ff; --ok:#43d17a; --cardAlt:#202735;
  }
  *{box-sizing:border-box}
  html,body{margin:0;height:100%}
@@ -45,6 +45,8 @@
  .list::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--panel)}
  .row{display:flex;align-items:stretch;background:var(--card);border-radius:11px;margin:6px 4px;border:1px solid transparent;overflow:hidden}
  .row:hover{background:var(--cardh)}
+ .row.alt{background:var(--cardAlt)}
+ .row.alt:hover{background:var(--cardh)}
  .rowMain{display:flex;align-items:center;gap:10px;min-width:0;flex:4 1 80%;padding:11px 10px 11px 12px;cursor:pointer}
  .row .accent{width:3px;height:20px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent2));flex:none;opacity:.9}
  .row .nm{flex:1;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -261,8 +263,8 @@ function moveToFolder(f){
   save(ITEMS); render();
 }
 
-function rowEl(it, idx, indent, canDrag, q){
-  const row=document.createElement('div'); row.className='row'+(indent?' indent':'');
+function rowEl(it, idx, indent, canDrag, q, stripeIndex){
+  const row=document.createElement('div'); row.className='row'+(indent?' indent':'')+(stripeIndex%2?' alt':'');
   const main=document.createElement('div'); main.className='rowMain';
   main.innerHTML='<div class="accent"></div><div class="nm">'+highlight(it.name,q)+'</div>'+
                  (canDrag?'<div class="grip" title="Verschieben oder in einen Ordner ziehen">⠿</div>':'<div class="pen">✎</div>');
@@ -306,13 +308,14 @@ function render(){
     if(!hits.length){ list.innerHTML='<div class="empty">Keine Treffer.</div>'; return; }
     const groups=new Map();
     hits.forEach(o=>{ const f=(o.it.folder||'').trim(); if(!groups.has(f)) groups.set(f,[]); groups.get(f).push(o); });
-    (groups.get('')||[]).forEach(o=> list.appendChild(rowEl(o.it,o.i,false,false,q)));
+    let searchStripeIndex=0;
+    (groups.get('')||[]).forEach(o=> list.appendChild(rowEl(o.it,o.i,false,false,q,searchStripeIndex++)));
     groups.forEach((arr,f)=>{ if(!f) return;
       const wrap=document.createElement('div'); wrap.className='fold';
       const head=document.createElement('div'); head.className='foldhead';
       head.innerHTML='<span class="arw">▾</span><span>'+highlight(f,q)+'</span>';
       wrap.appendChild(head); list.appendChild(wrap);
-      arr.forEach(o=> list.appendChild(rowEl(o.it,o.i,true,false,q)));
+      arr.forEach(o=> list.appendChild(rowEl(o.it,o.i,true,false,q,searchStripeIndex++)));
     });
     return;
   }
@@ -320,7 +323,8 @@ function render(){
   if(!ITEMS.length){ list.innerHTML='<div class="empty">Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⤒ importieren.</div>'; return; }
 
   // Textbausteine ohne Ordner
-  ITEMS.forEach((it,i)=>{ if(!(it.folder||'').trim()) list.appendChild(rowEl(it,i,false,true)); });
+  let stripeIndex=0;
+  ITEMS.forEach((it,i)=>{ if(!(it.folder||'').trim()) list.appendChild(rowEl(it,i,false,true,'',stripeIndex++)); });
   // Ordner
   const folders=[];
   ITEMS.forEach(it=>{ const f=(it.folder||'').trim(); if(f && !folders.includes(f)) folders.push(f); });
@@ -334,7 +338,7 @@ function render(){
     head.addEventListener('dragleave', ()=> head.classList.remove('dropinto'));
     head.addEventListener('drop', e=>{ if(!dragItem) return; e.preventDefault(); e.stopPropagation(); head.classList.remove('dropinto'); moveToFolder(f); });
     wrap.appendChild(head); list.appendChild(wrap);
-    if(FOLD[f]) ITEMS.forEach((it,i)=>{ if((it.folder||'').trim()===f) list.appendChild(rowEl(it,i,true,true)); });
+    if(FOLD[f]) ITEMS.forEach((it,i)=>{ if((it.folder||'').trim()===f) list.appendChild(rowEl(it,i,true,true,'',stripeIndex++)); });
   });
 }
 
@@ -465,6 +469,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
 /* Kompaktes, immer sichtbares Schwebefenster */
 let floatWindow=null;
 const floatButton=document.getElementById('btnFloat');
+const floatFolderState={};
 
 function setFloatingStatus(message,ok){
   if(!floatWindow||floatWindow.closed) return;
@@ -488,23 +493,42 @@ function renderFloating(){
   if(!hits.length){
     const empty=doc.createElement('div'); empty.className='floatEmpty'; empty.textContent=q?'Keine Treffer.':'Noch keine Textbausteine.'; list.appendChild(empty); return;
   }
+  const groups=new Map();
   hits.forEach(it=>{
-    const row=doc.createElement('div'); row.className='floatRow';
-    const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title='Makrotext kopieren';
-    const name=doc.createElement('span'); name.className='floatName'; name.textContent=it.name||'Ohne Namen';
-    const text=doc.createElement('span'); text.className='floatPreview'; text.textContent=preview(it.text)||'Leerer Makrotext';
-    main.append(name,text);
-    main.addEventListener('click',async ()=>{
-      const ok=await copyText(it.text,floatWindow);
-      setFloatingStatus(ok?'Makro kopiert':'Kopieren fehlgeschlagen',ok);
+    const folder=(it.folder||'').trim()||'Ohne Ordner';
+    if(!groups.has(folder)) groups.set(folder,[]);
+    groups.get(folder).push(it);
+  });
+  let stripeIndex=0;
+  groups.forEach((items,folder)=>{
+    const group=doc.createElement('section'); group.className='floatGroup';
+    const heading=doc.createElement('button'); heading.className='floatFolder'; heading.type='button';
+    const expanded=q||floatFolderState[folder]!==false;
+    heading.setAttribute('aria-expanded',String(expanded));
+    const arrow=doc.createElement('span'); arrow.className='floatFolderArrow'; arrow.textContent=expanded?'▾':'▸';
+    const label=doc.createElement('span'); label.textContent=folder;
+    heading.append(arrow,label);
+    const groupList=doc.createElement('div'); groupList.className='floatGroupItems'; groupList.hidden=!expanded;
+    heading.addEventListener('click',()=>{ floatFolderState[folder]=!expanded; renderFloating(); });
+    group.append(heading,groupList); list.appendChild(group);
+    items.forEach(it=>{
+      const row=doc.createElement('div'); row.className='floatRow'+(stripeIndex%2?' alt':''); stripeIndex++;
+      const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title='Makrotext kopieren';
+      const name=doc.createElement('span'); name.className='floatName'; name.textContent=it.name||'Ohne Namen';
+      const text=doc.createElement('span'); text.className='floatPreview'; text.textContent=preview(it.text)||'Leerer Makrotext';
+      main.append(name,text);
+      main.addEventListener('click',async ()=>{
+        const ok=await copyText(it.text,floatWindow);
+        setFloatingStatus(ok?'Makro kopiert':'Kopieren fehlgeschlagen',ok);
+      });
+      const memo=doc.createElement('button'); memo.className='floatMemo'; memo.type='button'; memo.textContent='Memo';
+      memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
+      memo.addEventListener('click',async ()=>{
+        const ok=await copyText(it.memo,floatWindow);
+        setFloatingStatus(ok?'Memo kopiert':'Kopieren fehlgeschlagen',ok);
+      });
+      row.append(main,memo); groupList.appendChild(row);
     });
-    const memo=doc.createElement('button'); memo.className='floatMemo'; memo.type='button'; memo.textContent='Memo';
-    memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
-    memo.addEventListener('click',async ()=>{
-      const ok=await copyText(it.memo,floatWindow);
-      setFloatingStatus(ok?'Memo kopiert':'Kopieren fehlgeschlagen',ok);
-    });
-    row.append(main,memo); list.appendChild(row);
   });
 }
 
@@ -520,18 +544,30 @@ async function openFloatingWindow(){
     pip.document.head.innerHTML='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
     const style=pip.document.createElement('style');
     style.textContent=`
-      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardh:#2f3542;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff}
+      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardAlt:#202735;--cardh:#2f3542;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff}
       *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:radial-gradient(600px 300px at 15% -10%,rgba(90,162,255,.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;overflow:hidden}
-      .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;gap:9px;padding:1px 2px 10px}.floatMark{width:25px;height:25px;border-radius:8px;background:linear-gradient(135deg,#ff235e,#7c5cff);box-shadow:0 4px 12px rgba(255,35,94,.25)}.floatTitle{font-size:14px;font-weight:750}.floatHint{margin-left:auto;color:var(--sub);font-size:11px}
-      .floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:8px}.floatSearch:focus{border-color:var(--accent)}
+      .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;gap:10px;padding:1px 2px 10px}.floatHeadText{min-width:0;display:flex;flex-direction:column;gap:2px}.floatTitle{font-size:14px;font-weight:750}.floatHint{color:var(--sub);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .floatMascot{width:48px;height:48px;flex:none;border:1px solid rgba(124,92,255,.45);border-radius:16px;background:linear-gradient(145deg,rgba(255,35,94,.17),rgba(90,162,255,.18));padding:4px;cursor:pointer;box-shadow:0 7px 17px rgba(124,92,255,.2);transition:transform .16s,box-shadow .16s}.floatMascot:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 22px rgba(124,92,255,.32)}.floatMascot:focus-visible{outline:2px solid #bcd9ff;outline-offset:2px}.floatMascot svg{width:100%;height:100%;display:block}
+      .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatPanel[hidden]{display:none}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:8px}.floatSearch:focus{border-color:var(--accent)}
       .floatList{min-height:0;overflow-y:auto;padding:0 1px 7px}.floatList::-webkit-scrollbar{width:9px}.floatList::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--bg)}
-      .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:10px;overflow:hidden;margin:6px 0}.floatRow:hover{background:var(--cardh)}button{font-family:inherit}
+      .floatGroup{margin:2px 0 8px}.floatFolder{width:100%;display:flex;align-items:center;gap:6px;border:0;border-radius:8px;background:#233047;color:#b9d0ff;padding:7px 9px;text-align:left;font:650 11.5px inherit;cursor:pointer}.floatFolder:hover{filter:brightness(1.1)}.floatFolderArrow{width:11px;font-size:11px}.floatGroupItems{padding-top:1px}.floatGroupItems[hidden]{display:none}
+      .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:10px;overflow:hidden;margin:6px 0}.floatRow:hover,.floatRow.alt:hover{background:var(--cardh)}.floatRow.alt{background:var(--cardAlt)}button{font-family:inherit}
       .floatMain{flex:4 1 80%;min-width:0;border:0;background:transparent;color:var(--text);padding:9px 10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}.floatMain:hover{background:rgba(255,255,255,.035)}.floatName,.floatPreview{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.floatName{font-size:13.5px;font-weight:650}.floatPreview{color:var(--sub);font-size:11.5px}
       .floatMemo{flex:0 0 20%;min-width:64px;border:0;border-left:1px solid var(--line);background:rgba(90,162,255,.08);color:#bcd9ff;font-size:12px;font-weight:750;cursor:pointer}.floatMemo:hover:not(:disabled){background:rgba(90,162,255,.2);color:#fff}.floatMemo:disabled{color:#697385;background:rgba(255,255,255,.025);cursor:default}
       .floatEmpty{text-align:center;color:var(--sub);font-size:13px;padding:28px 10px}.floatStatus{position:fixed;left:50%;bottom:12px;transform:translate(-50%,12px);opacity:0;pointer-events:none;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:650;transition:.16s;white-space:nowrap}.floatStatus.show{opacity:1;transform:translate(-50%,0)}.floatStatus.ok{background:#12351f;border:1px solid #2f7a4a;color:#c7f5d6}.floatStatus.bad{background:#3a1f12;border:1px solid #7a4a2f;color:#f5d9c7}
     `;
     pip.document.head.appendChild(style);
-    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><span class="floatMark"></span><span class="floatTitle">Snippet-Makro</span><span class="floatHint">Klick kopiert</span></div><input class="floatSearch" id="floatSearch" type="search" placeholder="Makros und Memos durchsuchen …" spellcheck="false"><div class="floatList" id="floatList"></div><div class="floatStatus" id="floatStatus"></div></main>';
+    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><button class="floatMascot" id="floatMascot" type="button" aria-expanded="false" aria-controls="floatPanel" title="Makros öffnen"><svg viewBox="0 0 80 80" aria-hidden="true"><defs><linearGradient id="mascotBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff477c"/><stop offset="1" stop-color="#7c5cff"/></linearGradient><linearGradient id="mascotFace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dff1ff"/><stop offset="1" stop-color="#8ebfff"/></linearGradient></defs><path d="M24 30 15 18l15 6M56 30l9-12-15 6" fill="url(#mascotBody)" stroke="#ff9ab7" stroke-width="2.5" stroke-linejoin="round"/><rect x="17" y="24" width="46" height="43" rx="20" fill="url(#mascotBody)" stroke="#ff9ab7" stroke-width="2.5"/><rect x="24" y="34" width="32" height="22" rx="11" fill="url(#mascotFace)"/><circle cx="33" cy="44" r="3" fill="#28304d"/><circle cx="47" cy="44" r="3" fill="#28304d"/><path d="M34 50q6 6 12 0" fill="none" stroke="#28304d" stroke-width="2.4" stroke-linecap="round"/><circle cx="40" cy="19" r="3" fill="#72d8ff"/><path d="M40 22v4" stroke="#72d8ff" stroke-width="2.5" stroke-linecap="round"/></svg></button><div class="floatHeadText"><span class="floatTitle">Snippet-Makro</span><span class="floatHint" id="floatHint">Klick mich für Makros</span></div></div><section class="floatPanel" id="floatPanel" hidden><input class="floatSearch" id="floatSearch" type="search" placeholder="Makros und Memos durchsuchen …" spellcheck="false"><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div></main>';
+    pip.document.getElementById('floatMascot').addEventListener('click',()=>{
+      const mascot=pip.document.getElementById('floatMascot');
+      const panel=pip.document.getElementById('floatPanel');
+      const open=panel.hidden;
+      panel.hidden=!open;
+      mascot.setAttribute('aria-expanded',String(open));
+      mascot.title=open?'Makros schließen':'Makros öffnen';
+      pip.document.getElementById('floatHint').textContent=open?'Makros geöffnet':'Klick mich für Makros';
+      if(open){ renderFloating(); pip.document.getElementById('floatSearch').focus(); }
+    });
     pip.document.getElementById('floatSearch').addEventListener('input',renderFloating);
     pip.addEventListener('pagehide',()=>{
       if(floatWindow===pip) floatWindow=null;

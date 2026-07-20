@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snippet-makro-v6';
+const CACHE_NAME = 'snippet-makro-v7';
 const APP_SHELL = [
   './',
   './index.html',
