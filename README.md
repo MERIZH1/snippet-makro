@@ -1,6 +1,6 @@
 # Snippet-Makro
 
-Installierbare Offline-Web-App für persönliche Textbausteine, kopierbare Memos und ein lokales Telefonbuch. In unterstützten Edge-Versionen kann eine kompakte Kopieransicht mit Ordnern und eigenem Maskottchen als dauerhaft sichtbares Schwebefenster geöffnet werden.
+Installierbare Offline-Web-App für persönliche Textbausteine, kopierbare Memos und ein lokales Telefonbuch. In unterstützten Edge-Versionen kann eine kompakte Kopieransicht mit Ordnern als dauerhaft sichtbares Schwebefenster geöffnet werden.
 
 Die öffentliche Startseite dient nur zur Installation. Die eigentliche Oberfläche wird im normalen Browser nicht geöffnet.
 

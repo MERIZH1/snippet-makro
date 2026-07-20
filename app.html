@@ -19,7 +19,7 @@
  :root{
    --bg:#0e1015; --panel:#1b1f27; --panel2:#20242e; --card:#262b36; --cardh:#2f3542;
    --line:#313846; --text:#eef1f6; --sub:#98a2b3; --accent:#5aa2ff; --accent2:#7c5cff;
-   --fold:#233047; --foldt:#b9d0ff; --ok:#43d17a; --cardAlt:#202735;
+   --fold:#233047; --foldt:#b9d0ff; --ok:#43d17a; --cardAlt:#1f3558;
  }
  *{box-sizing:border-box}
  html,body{margin:0;height:100%}
@@ -544,11 +544,10 @@ async function openFloatingWindow(){
     pip.document.head.innerHTML='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
     const style=pip.document.createElement('style');
     style.textContent=`
-      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardAlt:#202735;--cardh:#2f3542;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff}
+      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardAlt:#1f3558;--cardh:#34415a;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff}
       *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:radial-gradient(600px 300px at 15% -10%,rgba(90,162,255,.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;overflow:hidden}
-      .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;gap:10px;padding:1px 2px 10px}.floatHeadText{min-width:0;display:flex;flex-direction:column;gap:2px}.floatTitle{font-size:14px;font-weight:750}.floatHint{color:var(--sub);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .floatMascot{width:48px;height:48px;flex:none;border:1px solid rgba(124,92,255,.45);border-radius:16px;background:linear-gradient(145deg,rgba(255,35,94,.17),rgba(90,162,255,.18));padding:4px;cursor:pointer;box-shadow:0 7px 17px rgba(124,92,255,.2);transition:transform .16s,box-shadow .16s}.floatMascot:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 22px rgba(124,92,255,.32)}.floatMascot:focus-visible{outline:2px solid #bcd9ff;outline-offset:2px}.floatMascot svg{width:100%;height:100%;display:block}
-      .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatPanel[hidden]{display:none}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:8px}.floatSearch:focus{border-color:var(--accent)}
+      .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;padding:1px 2px 10px}.floatHeadText{min-width:0;display:flex;flex-direction:column;gap:2px}.floatTitle{font-size:14px;font-weight:750}.floatHint{color:var(--sub);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:8px}.floatSearch:focus{border-color:var(--accent)}
       .floatList{min-height:0;overflow-y:auto;padding:0 1px 7px}.floatList::-webkit-scrollbar{width:9px}.floatList::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--bg)}
       .floatGroup{margin:2px 0 8px}.floatFolder{width:100%;display:flex;align-items:center;gap:6px;border:0;border-radius:8px;background:#233047;color:#b9d0ff;padding:7px 9px;text-align:left;font:650 11.5px inherit;cursor:pointer}.floatFolder:hover{filter:brightness(1.1)}.floatFolderArrow{width:11px;font-size:11px}.floatGroupItems{padding-top:1px}.floatGroupItems[hidden]{display:none}
       .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:10px;overflow:hidden;margin:6px 0}.floatRow:hover,.floatRow.alt:hover{background:var(--cardh)}.floatRow.alt{background:var(--cardAlt)}button{font-family:inherit}
@@ -557,17 +556,7 @@ async function openFloatingWindow(){
       .floatEmpty{text-align:center;color:var(--sub);font-size:13px;padding:28px 10px}.floatStatus{position:fixed;left:50%;bottom:12px;transform:translate(-50%,12px);opacity:0;pointer-events:none;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:650;transition:.16s;white-space:nowrap}.floatStatus.show{opacity:1;transform:translate(-50%,0)}.floatStatus.ok{background:#12351f;border:1px solid #2f7a4a;color:#c7f5d6}.floatStatus.bad{background:#3a1f12;border:1px solid #7a4a2f;color:#f5d9c7}
     `;
     pip.document.head.appendChild(style);
-    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><button class="floatMascot" id="floatMascot" type="button" aria-expanded="false" aria-controls="floatPanel" title="Makros öffnen"><svg viewBox="0 0 80 80" aria-hidden="true"><defs><linearGradient id="mascotBody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff477c"/><stop offset="1" stop-color="#7c5cff"/></linearGradient><linearGradient id="mascotFace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dff1ff"/><stop offset="1" stop-color="#8ebfff"/></linearGradient></defs><path d="M24 30 15 18l15 6M56 30l9-12-15 6" fill="url(#mascotBody)" stroke="#ff9ab7" stroke-width="2.5" stroke-linejoin="round"/><rect x="17" y="24" width="46" height="43" rx="20" fill="url(#mascotBody)" stroke="#ff9ab7" stroke-width="2.5"/><rect x="24" y="34" width="32" height="22" rx="11" fill="url(#mascotFace)"/><circle cx="33" cy="44" r="3" fill="#28304d"/><circle cx="47" cy="44" r="3" fill="#28304d"/><path d="M34 50q6 6 12 0" fill="none" stroke="#28304d" stroke-width="2.4" stroke-linecap="round"/><circle cx="40" cy="19" r="3" fill="#72d8ff"/><path d="M40 22v4" stroke="#72d8ff" stroke-width="2.5" stroke-linecap="round"/></svg></button><div class="floatHeadText"><span class="floatTitle">Snippet-Makro</span><span class="floatHint" id="floatHint">Klick mich für Makros</span></div></div><section class="floatPanel" id="floatPanel" hidden><input class="floatSearch" id="floatSearch" type="search" placeholder="Makros und Memos durchsuchen …" spellcheck="false"><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div></main>';
-    pip.document.getElementById('floatMascot').addEventListener('click',()=>{
-      const mascot=pip.document.getElementById('floatMascot');
-      const panel=pip.document.getElementById('floatPanel');
-      const open=panel.hidden;
-      panel.hidden=!open;
-      mascot.setAttribute('aria-expanded',String(open));
-      mascot.title=open?'Makros schließen':'Makros öffnen';
-      pip.document.getElementById('floatHint').textContent=open?'Makros geöffnet':'Klick mich für Makros';
-      if(open){ renderFloating(); pip.document.getElementById('floatSearch').focus(); }
-    });
+    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><div class="floatHeadText"><span class="floatTitle">Snippet-Makro</span><span class="floatHint">Makros, Memos und Ordner</span></div></div><section class="floatPanel" id="floatPanel"><input class="floatSearch" id="floatSearch" type="search" placeholder="Makros und Memos durchsuchen …" spellcheck="false"><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div></main>';
     pip.document.getElementById('floatSearch').addEventListener('input',renderFloating);
     pip.addEventListener('pagehide',()=>{
       if(floatWindow===pip) floatWindow=null;
