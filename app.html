@@ -19,7 +19,7 @@
  :root{
    --bg:#0e1015; --panel:#1b1f27; --panel2:#20242e; --card:#262b36; --cardh:#2f3542;
    --line:#313846; --text:#eef1f6; --sub:#98a2b3; --accent:#5aa2ff; --accent2:#7c5cff;
-   --fold:#233047; --foldt:#b9d0ff; --ok:#43d17a; --cardAlt:#1f3558;
+   --fold:#302b58; --foldt:#d8d0ff; --ok:#43d17a; --cardAlt:#1f3558;
  }
  *{box-sizing:border-box}
  html,body{margin:0;height:100%}
@@ -28,10 +28,10 @@
    display:flex;justify-content:center;padding:22px 14px;-webkit-font-smoothing:antialiased}
  .panel{width:100%;max-width:460px;background:linear-gradient(180deg,var(--panel),#161a21);
    border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 44px)}
- .head{display:flex;align-items:center;gap:5px;padding:14px 14px 10px}
- .appLogo{width:32px;height:32px;border-radius:9px;flex:none;box-shadow:0 5px 14px rgba(255,35,94,.3)}
- .title{font-size:15px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
- .tbtn{width:32px;height:32px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
+ .head{display:flex;align-items:center;gap:3px;padding:14px 14px 10px}
+ .appLogo{width:30px;height:30px;border-radius:9px;flex:none;box-shadow:0 5px 14px rgba(255,35,94,.3)}
+ .title{font-size:14px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
+ .tbtn{width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
  .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .tbtn:hover{background:var(--panel2);color:var(--text)}
@@ -47,6 +47,7 @@
  .row:hover{background:var(--cardh)}
  .row.alt{background:var(--cardAlt)}
  .row.alt:hover{background:var(--cardh)}
+ .row.alt .accent{background:linear-gradient(#4fe0ff,#5aa2ff)}
  .rowMain{display:flex;align-items:center;gap:10px;min-width:0;flex:4 1 80%;padding:11px 10px 11px 12px;cursor:pointer}
  .row .accent{width:3px;height:20px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent2));flex:none;opacity:.9}
  .row .nm{flex:1;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -106,6 +107,14 @@
  .contactCompany{color:var(--sub);font-size:13px;overflow-wrap:anywhere}
  .contactEdit{width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--sub);cursor:pointer;font-size:15px}
  .contactEdit:hover{background:var(--panel2);color:var(--text)}
+ .helpModal{max-width:min(96vw,620px)}
+ .helpHead{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+ .helpIcon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#08101e;font-weight:800;font-size:20px;flex:none}
+ .helpHead h3{margin:0 0 3px}.helpHead p{margin:0;color:var(--sub);font-size:12.5px}
+ .helpGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .helpItem{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+ .helpItem strong{display:block;font-size:13px;margin-bottom:3px;color:#dce8ff}.helpItem span{display:block;color:var(--sub);font-size:12px;line-height:1.4}
+ @media(max-width:520px){.helpGrid{grid-template-columns:1fr}}
  @media(max-width:620px){
    .head{gap:4px}.appLogo{display:none}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
    .rowMain{gap:7px;padding-left:10px}.memoBtn{min-width:60px}
@@ -124,6 +133,7 @@
      <button class="tbtn" id="btnFloat" title="Schwebefenster öffnen" aria-label="Schwebefenster öffnen">
        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="11" y="11" width="7" height="5" rx="1"/></svg>
      </button>
+     <button class="tbtn" id="btnHelp" title="Bedienung erklären" aria-label="Bedienung erklären">?</button>
      <button class="tbtn" id="btnContacts" title="Telefonbuch" aria-label="Telefonbuch">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
      </button>
@@ -188,6 +198,26 @@
        <div class="grow"></div>
        <button class="btn" id="contactCancel">Abbrechen</button>
      </div>
+   </div>
+ </div>
+
+ <div class="ov" id="helpOv">
+   <div class="modal helpModal">
+     <div class="helpHead">
+       <span class="helpIcon">?</span>
+       <div><h3>So funktioniert Snippet-Makro</h3><p>Die wichtigsten Funktionen auf einen Blick.</p></div>
+     </div>
+     <div class="helpGrid">
+       <div class="helpItem"><strong>Makro kopieren</strong><span>Linken Bereich eines Eintrags anklicken. Der Makrotext liegt danach in der Zwischenablage.</span></div>
+       <div class="helpItem"><strong>Memo kopieren</strong><span>Rechts auf <b>Memo</b> klicken. Das Memo wird getrennt vom Makrotext kopiert.</span></div>
+       <div class="helpItem"><strong>Makros anlegen</strong><span>Mit <b>＋</b> einen Namen, Ordner, Text und optional ein Memo speichern.</span></div>
+       <div class="helpItem"><strong>Ordner</strong><span>Ordnerüberschriften anklicken, um sie auf- oder zuzuklappen. Ungeordnete Makros stehen oben.</span></div>
+       <div class="helpItem"><strong>Sortieren</strong><span>Mit <b>⠿</b> einen Eintrag per Ziehen verschieben oder in einen Ordner ziehen.</span></div>
+       <div class="helpItem"><strong>Schwebefenster</strong><span>Das Fenster-Symbol öffnet die Kopieransicht über anderen Programmen. Die Reihenfolge bleibt identisch.</span></div>
+       <div class="helpItem"><strong>Telefonbuch</strong><span>Telefonnummer anklicken, um sie zu kopieren. Kontakte lassen sich jederzeit bearbeiten.</span></div>
+       <div class="helpItem"><strong>Sicherung</strong><span><b>⤓</b> exportiert alle Daten, <b>⤒</b> importiert eine vorhandene JSON-Sicherung.</span></div>
+     </div>
+     <div class="acts"><div class="grow"></div><button class="btn" id="helpClose">Schließen</button></div>
    </div>
  </div>
 
@@ -298,48 +328,43 @@ function rowEl(it, idx, indent, canDrag, q, stripeIndex){
   return row;
 }
 
+function groupsForQuery(q){
+  const entries=ITEMS.map((it,i)=>({it,i}));
+  const source=q ? entries.filter(o=> (o.it.name+' '+o.it.text+' '+(o.it.memo||'')+' '+(o.it.folder||'')).toLowerCase().includes(q)) : entries;
+  const unfiled=source.filter(o=>!(o.it.folder||'').trim());
+  const folderNames=[];
+  source.forEach(o=>{ const f=(o.it.folder||'').trim(); if(f && !folderNames.includes(f)) folderNames.push(f); });
+  const folders=folderNames.map(folder=>({folder,items:source.filter(o=>(o.it.folder||'').trim()===folder)}));
+  return {source,unfiled,folders};
+}
+
 function render(){
   const list=document.getElementById('list'); list.innerHTML='';
   const q=document.getElementById('search').value.trim().toLowerCase();
-
-  // Suche: Treffer nach Ordner gruppieren und Suchwort im Titel hervorheben
-  if(q){
-    const hits=ITEMS.map((it,i)=>({it,i})).filter(o=> (o.it.name+' '+o.it.text+' '+(o.it.memo||'')+' '+(o.it.folder||'')).toLowerCase().includes(q));
-    if(!hits.length){ list.innerHTML='<div class="empty">Keine Treffer.</div>'; return; }
-    const groups=new Map();
-    hits.forEach(o=>{ const f=(o.it.folder||'').trim(); if(!groups.has(f)) groups.set(f,[]); groups.get(f).push(o); });
-    let searchStripeIndex=0;
-    (groups.get('')||[]).forEach(o=> list.appendChild(rowEl(o.it,o.i,false,false,q,searchStripeIndex++)));
-    groups.forEach((arr,f)=>{ if(!f) return;
-      const wrap=document.createElement('div'); wrap.className='fold';
-      const head=document.createElement('div'); head.className='foldhead';
-      head.innerHTML='<span class="arw">▾</span><span>'+highlight(f,q)+'</span>';
-      wrap.appendChild(head); list.appendChild(wrap);
-      arr.forEach(o=> list.appendChild(rowEl(o.it,o.i,true,false,q,searchStripeIndex++)));
-    });
-    return;
+  const groups=groupsForQuery(q);
+  if(!groups.source.length){
+    list.innerHTML=q?'<div class="empty">Keine Treffer.</div>':'<div class="empty">Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⤒ importieren.</div>';
+    renderFloating(); return;
   }
 
-  if(!ITEMS.length){ list.innerHTML='<div class="empty">Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⤒ importieren.</div>'; return; }
-
-  // Textbausteine ohne Ordner
   let stripeIndex=0;
-  ITEMS.forEach((it,i)=>{ if(!(it.folder||'').trim()) list.appendChild(rowEl(it,i,false,true,'',stripeIndex++)); });
-  // Ordner
-  const folders=[];
-  ITEMS.forEach(it=>{ const f=(it.folder||'').trim(); if(f && !folders.includes(f)) folders.push(f); });
-  folders.forEach(f=>{
-    if(!(f in FOLD)) FOLD[f]=false;
+  groups.unfiled.forEach(o=> list.appendChild(rowEl(o.it,o.i,false,!q,q,stripeIndex++)));
+  groups.folders.forEach(({folder,items})=>{
+    if(!q && !(folder in FOLD)) FOLD[folder]=false;
+    const expanded=q||FOLD[folder];
     const wrap=document.createElement('div'); wrap.className='fold';
     const head=document.createElement('div'); head.className='foldhead';
-    head.innerHTML='<span class="arw">'+(FOLD[f]?'▾':'▸')+'</span><span>'+esc(f)+'</span>';
-    head.addEventListener('click', ()=>{ FOLD[f]=!FOLD[f]; render(); });
-    head.addEventListener('dragover', e=>{ if(!dragItem) return; e.preventDefault(); e.dataTransfer.dropEffect='move'; head.classList.add('dropinto'); });
-    head.addEventListener('dragleave', ()=> head.classList.remove('dropinto'));
-    head.addEventListener('drop', e=>{ if(!dragItem) return; e.preventDefault(); e.stopPropagation(); head.classList.remove('dropinto'); moveToFolder(f); });
+    head.innerHTML='<span class="arw">'+(expanded?'▾':'▸')+'</span><span>'+highlight(folder,q)+'</span>';
+    if(!q){
+      head.addEventListener('click', ()=>{ FOLD[folder]=!FOLD[folder]; render(); });
+      head.addEventListener('dragover', e=>{ if(!dragItem) return; e.preventDefault(); e.dataTransfer.dropEffect='move'; head.classList.add('dropinto'); });
+      head.addEventListener('dragleave', ()=> head.classList.remove('dropinto'));
+      head.addEventListener('drop', e=>{ if(!dragItem) return; e.preventDefault(); e.stopPropagation(); head.classList.remove('dropinto'); moveToFolder(folder); });
+    }
     wrap.appendChild(head); list.appendChild(wrap);
-    if(FOLD[f]) ITEMS.forEach((it,i)=>{ if((it.folder||'').trim()===f) list.appendChild(rowEl(it,i,true,true,'',stripeIndex++)); });
+    if(expanded) items.forEach(o=> list.appendChild(rowEl(o.it,o.i,true,!q,q,stripeIndex++)));
   });
+  renderFloating();
 }
 
 /* Bearbeiten */
@@ -439,6 +464,13 @@ document.getElementById('contactDelete').addEventListener('click',()=>{
   }
 });
 
+/* Hilfe */
+function openHelp(){ document.getElementById('helpOv').classList.add('show'); }
+function closeHelp(){ document.getElementById('helpOv').classList.remove('show'); }
+document.getElementById('btnHelp').addEventListener('click',openHelp);
+document.getElementById('helpClose').addEventListener('click',closeHelp);
+document.getElementById('helpOv').addEventListener('click',e=>{ if(e.target.id==='helpOv') closeHelp(); });
+
 /* Export und Import */
 document.getElementById('btnExport').addEventListener('click', ()=>{
   const data={version:3,snippets:ITEMS,contacts:CONTACTS};
@@ -461,7 +493,8 @@ document.getElementById('fileImport').addEventListener('change', e=>{
   r.readAsText(f); e.target.value='';
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
-  if(document.getElementById('contactEditOv').classList.contains('show')) closeContactEdit();
+  if(document.getElementById('helpOv').classList.contains('show')) closeHelp();
+  else if(document.getElementById('contactEditOv').classList.contains('show')) closeContactEdit();
   else if(document.getElementById('contactsOv').classList.contains('show')) closeContacts();
   else closeEdit();
 } });
@@ -469,7 +502,6 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
 /* Kompaktes, immer sichtbares Schwebefenster */
 let floatWindow=null;
 const floatButton=document.getElementById('btnFloat');
-const floatFolderState={};
 
 function setFloatingStatus(message,ok){
   if(!floatWindow||floatWindow.closed) return;
@@ -481,6 +513,26 @@ function setFloatingStatus(message,ok){
   status.hideTimer=setTimeout(()=>status.className='floatStatus',1500);
 }
 
+function appendFloatingRow(doc, groupList, entry, q, stripeIndex){
+  const it=entry.it;
+  const row=doc.createElement('div'); row.className='floatRow'+(stripeIndex%2?' alt':'');
+  const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title='Makrotext kopieren';
+  const accent=doc.createElement('span'); accent.className='floatAccent';
+  const name=doc.createElement('span'); name.className='floatName'; name.innerHTML=highlight(it.name,q);
+  main.append(accent,name);
+  main.addEventListener('click',async ()=>{
+    const ok=await copyText(it.text,floatWindow);
+    setFloatingStatus(ok?'Makro kopiert':'Kopieren fehlgeschlagen',ok);
+  });
+  const memo=doc.createElement('button'); memo.className='floatMemo'; memo.type='button'; memo.textContent='Memo';
+  memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
+  memo.addEventListener('click',async ()=>{
+    const ok=await copyText(it.memo,floatWindow);
+    setFloatingStatus(ok?'Memo kopiert':'Kopieren fehlgeschlagen',ok);
+  });
+  row.append(main,memo); groupList.appendChild(row);
+}
+
 function renderFloating(){
   if(!floatWindow||floatWindow.closed) return;
   const doc=floatWindow.document;
@@ -488,47 +540,26 @@ function renderFloating(){
   const search=doc.getElementById('floatSearch');
   if(!list||!search) return;
   const q=search.value.trim().toLowerCase();
-  const hits=ITEMS.filter(it=>(it.name+' '+it.text+' '+(it.memo||'')+' '+(it.folder||'')).toLowerCase().includes(q));
+  const groups=groupsForQuery(q);
   list.innerHTML='';
-  if(!hits.length){
+  if(!groups.source.length){
     const empty=doc.createElement('div'); empty.className='floatEmpty'; empty.textContent=q?'Keine Treffer.':'Noch keine Textbausteine.'; list.appendChild(empty); return;
   }
-  const groups=new Map();
-  hits.forEach(it=>{
-    const folder=(it.folder||'').trim()||'Ohne Ordner';
-    if(!groups.has(folder)) groups.set(folder,[]);
-    groups.get(folder).push(it);
-  });
   let stripeIndex=0;
-  groups.forEach((items,folder)=>{
+  groups.unfiled.forEach(entry=> appendFloatingRow(doc,list,entry,q,stripeIndex++));
+  groups.folders.forEach(({folder,items})=>{
+    if(!(folder in FOLD)) FOLD[folder]=false;
     const group=doc.createElement('section'); group.className='floatGroup';
     const heading=doc.createElement('button'); heading.className='floatFolder'; heading.type='button';
-    const expanded=q||floatFolderState[folder]!==false;
+    const expanded=q||FOLD[folder];
     heading.setAttribute('aria-expanded',String(expanded));
     const arrow=doc.createElement('span'); arrow.className='floatFolderArrow'; arrow.textContent=expanded?'▾':'▸';
-    const label=doc.createElement('span'); label.textContent=folder;
+    const label=doc.createElement('span'); label.innerHTML=highlight(folder,q);
     heading.append(arrow,label);
     const groupList=doc.createElement('div'); groupList.className='floatGroupItems'; groupList.hidden=!expanded;
-    heading.addEventListener('click',()=>{ floatFolderState[folder]=!expanded; renderFloating(); });
+    if(!q) heading.addEventListener('click',()=>{ FOLD[folder]=!FOLD[folder]; render(); });
     group.append(heading,groupList); list.appendChild(group);
-    items.forEach(it=>{
-      const row=doc.createElement('div'); row.className='floatRow'+(stripeIndex%2?' alt':''); stripeIndex++;
-      const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title='Makrotext kopieren';
-      const name=doc.createElement('span'); name.className='floatName'; name.textContent=it.name||'Ohne Namen';
-      const text=doc.createElement('span'); text.className='floatPreview'; text.textContent=preview(it.text)||'Leerer Makrotext';
-      main.append(name,text);
-      main.addEventListener('click',async ()=>{
-        const ok=await copyText(it.text,floatWindow);
-        setFloatingStatus(ok?'Makro kopiert':'Kopieren fehlgeschlagen',ok);
-      });
-      const memo=doc.createElement('button'); memo.className='floatMemo'; memo.type='button'; memo.textContent='Memo';
-      memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
-      memo.addEventListener('click',async ()=>{
-        const ok=await copyText(it.memo,floatWindow);
-        setFloatingStatus(ok?'Memo kopiert':'Kopieren fehlgeschlagen',ok);
-      });
-      row.append(main,memo); groupList.appendChild(row);
-    });
+    if(expanded) items.forEach(entry=> appendFloatingRow(doc,groupList,entry,q,stripeIndex++));
   });
 }
 
@@ -544,15 +575,15 @@ async function openFloatingWindow(){
     pip.document.head.innerHTML='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
     const style=pip.document.createElement('style');
     style.textContent=`
-      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardAlt:#1f3558;--cardh:#34415a;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff}
+      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardAlt:#1f3558;--cardh:#2f3542;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff;--fold:#302b58;--foldt:#d8d0ff}
       *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:radial-gradient(600px 300px at 15% -10%,rgba(90,162,255,.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;overflow:hidden}
       .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;padding:1px 2px 10px}.floatHeadText{min-width:0;display:flex;flex-direction:column;gap:2px}.floatTitle{font-size:14px;font-weight:750}.floatHint{color:var(--sub);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:8px}.floatSearch:focus{border-color:var(--accent)}
       .floatList{min-height:0;overflow-y:auto;padding:0 1px 7px}.floatList::-webkit-scrollbar{width:9px}.floatList::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--bg)}
-      .floatGroup{margin:2px 0 8px}.floatFolder{width:100%;display:flex;align-items:center;gap:6px;border:0;border-radius:8px;background:#233047;color:#b9d0ff;padding:7px 9px;text-align:left;font:650 11.5px inherit;cursor:pointer}.floatFolder:hover{filter:brightness(1.1)}.floatFolderArrow{width:11px;font-size:11px}.floatGroupItems{padding-top:1px}.floatGroupItems[hidden]{display:none}
-      .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:10px;overflow:hidden;margin:6px 0}.floatRow:hover,.floatRow.alt:hover{background:var(--cardh)}.floatRow.alt{background:var(--cardAlt)}button{font-family:inherit}
-      .floatMain{flex:4 1 80%;min-width:0;border:0;background:transparent;color:var(--text);padding:9px 10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}.floatMain:hover{background:rgba(255,255,255,.035)}.floatName,.floatPreview{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.floatName{font-size:13.5px;font-weight:650}.floatPreview{color:var(--sub);font-size:11.5px}
-      .floatMemo{flex:0 0 20%;min-width:64px;border:0;border-left:1px solid var(--line);background:rgba(90,162,255,.08);color:#bcd9ff;font-size:12px;font-weight:750;cursor:pointer}.floatMemo:hover:not(:disabled){background:rgba(90,162,255,.2);color:#fff}.floatMemo:disabled{color:#697385;background:rgba(255,255,255,.025);cursor:default}
+      .floatGroup{margin:8px 4px 2px}.floatFolder{width:100%;display:flex;align-items:center;gap:8px;border:0;border-radius:10px;background:var(--fold);color:var(--foldt);padding:9px 12px;text-align:left;font:600 14px inherit;cursor:pointer}.floatFolder:hover{filter:brightness(1.08)}.floatFolderArrow{width:12px;font-size:12px}.floatGroupItems{padding-top:1px}.floatGroupItems[hidden]{display:none}.floatGroupItems .floatRow{margin-left:16px}
+      .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:11px;overflow:hidden;margin:6px 4px}.floatRow:hover,.floatRow.alt:hover{background:var(--cardh)}.floatRow.alt{background:var(--cardAlt)}.floatRow.alt .floatAccent{background:linear-gradient(#4fe0ff,#5aa2ff)}button{font-family:inherit}
+      .floatMain{flex:4 1 80%;min-width:0;border:0;background:transparent;color:var(--text);padding:11px 10px 11px 12px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px}.floatMain:hover{background:transparent}.floatAccent{width:3px;height:20px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent2));flex:none;opacity:.9}.floatName{flex:1;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px}
+      .floatMemo{flex:0 0 20%;min-width:68px;border:0;border-left:1px solid var(--line);background:rgba(90,162,255,.07);color:#bcd9ff;font:700 12px inherit;cursor:pointer;letter-spacing:.02em}.floatMemo:hover:not(:disabled){background:rgba(90,162,255,.18);color:#fff}.floatMemo:disabled{color:#697385;background:rgba(255,255,255,.025);cursor:default}
       .floatEmpty{text-align:center;color:var(--sub);font-size:13px;padding:28px 10px}.floatStatus{position:fixed;left:50%;bottom:12px;transform:translate(-50%,12px);opacity:0;pointer-events:none;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:650;transition:.16s;white-space:nowrap}.floatStatus.show{opacity:1;transform:translate(-50%,0)}.floatStatus.ok{background:#12351f;border:1px solid #2f7a4a;color:#c7f5d6}.floatStatus.bad{background:#3a1f12;border:1px solid #7a4a2f;color:#f5d9c7}
     `;
     pip.document.head.appendChild(style);
