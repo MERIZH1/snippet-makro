@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Lokales Offline-Menü für Textbausteine und Kontakte">
+<meta name="description" content="Lokales Offline-Menü für Textbausteine, Memos und Kontakte">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <script>
  if(!window.matchMedia('(display-mode: standalone)').matches &&
@@ -28,10 +28,10 @@
    display:flex;justify-content:center;padding:22px 14px;-webkit-font-smoothing:antialiased}
  .panel{width:100%;max-width:460px;background:linear-gradient(180deg,var(--panel),#161a21);
    border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 44px)}
- .head{display:flex;align-items:center;gap:8px;padding:14px 14px 10px}
- .appLogo{width:34px;height:34px;border-radius:9px;flex:none;box-shadow:0 5px 14px rgba(255,35,94,.3)}
- .title{font-size:16px;font-weight:700;flex:1;letter-spacing:.2px}
- .tbtn{width:34px;height:34px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
+ .head{display:flex;align-items:center;gap:5px;padding:14px 14px 10px}
+ .appLogo{width:32px;height:32px;border-radius:9px;flex:none;box-shadow:0 5px 14px rgba(255,35,94,.3)}
+ .title{font-size:15px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
+ .tbtn{width:32px;height:32px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
  .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .tbtn:hover{background:var(--panel2);color:var(--text)}
@@ -43,13 +43,16 @@
  .list{overflow-y:auto;padding:2px 10px 12px}
  .list::-webkit-scrollbar{width:10px}
  .list::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--panel)}
- .row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:11px;padding:11px 12px;margin:6px 4px;cursor:pointer;border:1px solid transparent}
+ .row{display:flex;align-items:stretch;background:var(--card);border-radius:11px;margin:6px 4px;border:1px solid transparent;overflow:hidden}
  .row:hover{background:var(--cardh)}
+ .rowMain{display:flex;align-items:center;gap:10px;min-width:0;flex:4 1 80%;padding:11px 10px 11px 12px;cursor:pointer}
  .row .accent{width:3px;height:20px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent2));flex:none;opacity:.9}
  .row .nm{flex:1;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
- .row .pv{color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
  .row .pen{color:var(--sub);font-size:14px;opacity:0;padding:0 2px}
  .row:hover .pen{opacity:.7}
+ .memoBtn{flex:0 0 20%;min-width:68px;border:0;border-left:1px solid var(--line);background:rgba(90,162,255,.07);color:#bcd9ff;font:700 12px inherit;cursor:pointer;letter-spacing:.02em}
+ .memoBtn:hover:not(:disabled){background:rgba(90,162,255,.18);color:#fff}
+ .memoBtn:disabled{color:#697385;background:rgba(255,255,255,.025);cursor:default}
  .fold{margin:8px 4px 2px}
  .foldhead{display:flex;align-items:center;gap:8px;background:var(--fold);color:var(--foldt);border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:600;font-size:14px}
  .foldhead:hover{filter:brightness(1.08)}
@@ -77,6 +80,7 @@
  .modal input,.modal textarea{width:100%;background:#12151b;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:14px;outline:none}
  .modal input:focus,.modal textarea:focus{border-color:var(--accent)}
  .modal textarea{min-height:260px;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden;overflow-y:hidden;font-family:'Cascadia Mono',Consolas,monospace;font-size:13px;line-height:1.45}
+ #mMemo{min-height:120px}
  .acts{display:flex;gap:8px;margin-top:16px}
  .acts .grow{flex:1}
  .btn{padding:9px 15px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:13.5px;cursor:pointer;font-family:inherit}
@@ -102,6 +106,7 @@
  .contactEdit:hover{background:var(--panel2);color:var(--text)}
  @media(max-width:620px){
    .head{gap:4px}.appLogo{display:none}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
+   .rowMain{gap:7px;padding-left:10px}.memoBtn{min-width:60px}
    .contactCols{display:none}
    .contactRow{grid-template-columns:minmax(0,1fr) 36px;gap:4px 10px}
    .contactName,.contactPhone,.contactCompany{grid-column:1}
@@ -114,6 +119,9 @@
    <div class="head">
      <img class="appLogo" src="snippet-logo-192.png" alt="">
      <div class="title">Snippet-Makro</div>
+     <button class="tbtn" id="btnFloat" title="Schwebefenster öffnen" aria-label="Schwebefenster öffnen">
+       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="11" y="11" width="7" height="5" rx="1"/></svg>
+     </button>
      <button class="tbtn" id="btnContacts" title="Telefonbuch" aria-label="Telefonbuch">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
      </button>
@@ -140,6 +148,8 @@
      <input id="mFolder" type="text" spellcheck="false">
      <label>Text</label>
      <textarea id="mText" spellcheck="false"></textarea>
+     <label>Memo</label>
+     <textarea id="mMemo" spellcheck="false" placeholder="Zusätzlichen kopierbaren Memo-Text eintragen …"></textarea>
      <div class="acts">
        <button class="btn primary" id="mSave">Speichern</button>
        <button class="btn danger" id="mDelete">Löschen</button>
@@ -188,8 +198,18 @@ let editIndex = -1;         // -1 = neu
 
 const DEFAULTS = [];
 
-function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)); if(Array.isArray(r)) return r; }catch(e){} return DEFAULTS.slice(); }
-function save(items){ localStorage.setItem(KEY, JSON.stringify(items)); }
+function normalizeItems(items){
+  if(!Array.isArray(items)) return [];
+  return items.filter(it=>it && typeof it==='object').map(it=>({
+    ...it,
+    name:typeof it.name==='string'?it.name:'',
+    folder:typeof it.folder==='string'?it.folder:'',
+    text:typeof it.text==='string'?it.text:'',
+    memo:typeof it.memo==='string'?it.memo:''
+  }));
+}
+function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)); if(Array.isArray(r)) return normalizeItems(r); }catch(e){} return DEFAULTS.slice(); }
+function save(items){ localStorage.setItem(KEY, JSON.stringify(items)); renderFloating(); }
 function loadContacts(){ try{ const r=JSON.parse(localStorage.getItem(CONTACT_KEY)); if(Array.isArray(r)) return r; }catch(e){} return []; }
 function saveContacts(contacts){ localStorage.setItem(CONTACT_KEY, JSON.stringify(contacts)); }
 let ITEMS = load();
@@ -203,11 +223,13 @@ function highlight(s,q){ const t=String(s==null?'':s); if(!q) return esc(t);
     out+=esc(rest.slice(0,k))+'<mark>'+esc(rest.slice(k,k+ql))+'</mark>'; rest=rest.slice(k+ql); }
   return out; }
 
-async function copyText(t){
-  try{ await navigator.clipboard.writeText(t); return true; }
+async function copyText(t,targetWindow=window){
+  const targetNavigator=targetWindow.navigator||navigator;
+  const targetDocument=targetWindow.document||document;
+  try{ await targetNavigator.clipboard.writeText(t); return true; }
   catch(e){
-    try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }
+    try{ const ta=targetDocument.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+      targetDocument.body.appendChild(ta); ta.select(); const ok=targetDocument.execCommand('copy'); targetDocument.body.removeChild(ta); return ok; }
     catch(_){ return false; }
   }
 }
@@ -241,13 +263,23 @@ function moveToFolder(f){
 
 function rowEl(it, idx, indent, canDrag, q){
   const row=document.createElement('div'); row.className='row'+(indent?' indent':'');
-  row.innerHTML='<div class="accent"></div><div class="nm">'+highlight(it.name,q)+'</div>'+
-                (canDrag?'<div class="grip" title="Verschieben oder in einen Ordner ziehen">⠿</div>':'<div class="pen">✎</div>');
-  row.addEventListener('click', async (e)=>{
+  const main=document.createElement('div'); main.className='rowMain';
+  main.innerHTML='<div class="accent"></div><div class="nm">'+highlight(it.name,q)+'</div>'+
+                 (canDrag?'<div class="grip" title="Verschieben oder in einen Ordner ziehen">⠿</div>':'<div class="pen">✎</div>');
+  const memo=document.createElement('button'); memo.className='memoBtn'; memo.type='button'; memo.textContent='Memo';
+  memo.disabled=!(it.memo||'').length;
+  memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
+  row.append(main,memo);
+  main.addEventListener('click', async (e)=>{
     if(e.target.classList.contains('grip')) return;
     if(editMode){ openEdit(idx); return; }
     const ok=await copyText(it.text);
     toast(ok?'Kopiert – jetzt Strg+V drücken':'Kopieren fehlgeschlagen', ok);
+  });
+  memo.addEventListener('click',async e=>{
+    e.stopPropagation();
+    const ok=await copyText(it.memo);
+    toast(ok?'Memo kopiert – jetzt Strg+V drücken':'Kopieren fehlgeschlagen',ok);
   });
   if(canDrag){
     row.draggable=true;
@@ -270,7 +302,7 @@ function render(){
 
   // Suche: Treffer nach Ordner gruppieren und Suchwort im Titel hervorheben
   if(q){
-    const hits=ITEMS.map((it,i)=>({it,i})).filter(o=> (o.it.name+' '+o.it.text+' '+(o.it.folder||'')).toLowerCase().includes(q));
+    const hits=ITEMS.map((it,i)=>({it,i})).filter(o=> (o.it.name+' '+o.it.text+' '+(o.it.memo||'')+' '+(o.it.folder||'')).toLowerCase().includes(q));
     if(!hits.length){ list.innerHTML='<div class="empty">Keine Treffer.</div>'; return; }
     const groups=new Map();
     hits.forEach(o=>{ const f=(o.it.folder||'').trim(); if(!groups.has(f)) groups.set(f,[]); groups.get(f).push(o); });
@@ -307,21 +339,26 @@ function render(){
 }
 
 /* Bearbeiten */
-function fitTextEditor(){
-  const el=document.getElementById('mText');
+function fitEditor(id,minHeight){
+  const el=document.getElementById(id);
   el.style.height='auto';
-  el.style.height=Math.max(260,el.scrollHeight+2)+'px';
+  el.style.height=Math.max(minHeight,el.scrollHeight+2)+'px';
+}
+function fitTextEditors(){
+  fitEditor('mText',260);
+  fitEditor('mMemo',120);
 }
 function openEdit(idx){
   editIndex=idx;
-  const it = idx>=0 ? ITEMS[idx] : {name:'',folder:'',text:''};
+  const it = idx>=0 ? ITEMS[idx] : {name:'',folder:'',text:'',memo:''};
   document.getElementById('mTitle').textContent = idx>=0?'Textbaustein bearbeiten':'Neuer Textbaustein';
   document.getElementById('mName').value=it.name||'';
   document.getElementById('mFolder').value=it.folder||'';
   document.getElementById('mText').value=it.text||'';
+  document.getElementById('mMemo').value=it.memo||'';
   document.getElementById('mDelete').style.display = idx>=0?'':'none';
   document.getElementById('ov').classList.add('show');
-  fitTextEditor();
+  fitTextEditors();
   setTimeout(()=>document.getElementById('mName').focus(),30);
 }
 function closeEdit(){ document.getElementById('ov').classList.remove('show'); }
@@ -329,7 +366,7 @@ function closeEdit(){ document.getElementById('ov').classList.remove('show'); }
 document.getElementById('mSave').addEventListener('click', ()=>{
   const name=document.getElementById('mName').value.trim();
   if(!name){ document.getElementById('mName').focus(); return; }
-  const obj={name, folder:document.getElementById('mFolder').value.trim(), text:document.getElementById('mText').value};
+  const obj={name, folder:document.getElementById('mFolder').value.trim(), text:document.getElementById('mText').value, memo:document.getElementById('mMemo').value};
   if(editIndex>=0) ITEMS[editIndex]=obj; else ITEMS.push(obj);
   save(ITEMS); closeEdit(); render();
 });
@@ -338,8 +375,9 @@ document.getElementById('mDelete').addEventListener('click', ()=>{
 });
 document.getElementById('mCancel').addEventListener('click', closeEdit);
 document.getElementById('ov').addEventListener('click', e=>{ if(e.target.id==='ov') closeEdit(); });
-document.getElementById('mText').addEventListener('input', fitTextEditor);
-window.addEventListener('resize', ()=>{ if(document.getElementById('ov').classList.contains('show')) fitTextEditor(); });
+document.getElementById('mText').addEventListener('input', fitTextEditors);
+document.getElementById('mMemo').addEventListener('input', fitTextEditors);
+window.addEventListener('resize', ()=>{ if(document.getElementById('ov').classList.contains('show')) fitTextEditors(); });
 
 document.getElementById('btnNew').addEventListener('click', ()=>openEdit(-1));
 document.getElementById('btnEdit').addEventListener('click', function(){ editMode=!editMode; this.classList.toggle('on',editMode); toast(editMode?'Bearbeitungsmodus: Textbaustein anklicken':'Bearbeitungsmodus beendet', true); });
@@ -399,7 +437,7 @@ document.getElementById('contactDelete').addEventListener('click',()=>{
 
 /* Export und Import */
 document.getElementById('btnExport').addEventListener('click', ()=>{
-  const data={version:2,snippets:ITEMS,contacts:CONTACTS};
+  const data={version:3,snippets:ITEMS,contacts:CONTACTS};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='snippet-makro-backup.json'; a.click();
 });
@@ -409,9 +447,9 @@ document.getElementById('fileImport').addEventListener('change', e=>{
   const r=new FileReader(); r.onload=()=>{ try{
     const data=JSON.parse(r.result);
     if(Array.isArray(data)){
-      ITEMS=data; save(ITEMS); render(); toast('Alte Snippet-Sicherung importiert',true);
+      ITEMS=normalizeItems(data); save(ITEMS); render(); toast('Alte Snippet-Sicherung importiert',true);
     }else if(data && Array.isArray(data.snippets) && (data.contacts===undefined || Array.isArray(data.contacts))){
-      ITEMS=data.snippets; save(ITEMS);
+      ITEMS=normalizeItems(data.snippets); save(ITEMS);
       if(Array.isArray(data.contacts)){ CONTACTS=data.contacts; saveContacts(CONTACTS); }
       render(); renderContacts(); toast('Sicherung importiert',true);
     }else toast('Ungültige Datei',false);
@@ -423,6 +461,95 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
   else if(document.getElementById('contactsOv').classList.contains('show')) closeContacts();
   else closeEdit();
 } });
+
+/* Kompaktes, immer sichtbares Schwebefenster */
+let floatWindow=null;
+const floatButton=document.getElementById('btnFloat');
+
+function setFloatingStatus(message,ok){
+  if(!floatWindow||floatWindow.closed) return;
+  const status=floatWindow.document.getElementById('floatStatus');
+  if(!status) return;
+  status.textContent=(ok?'✓ ':'⚠ ')+message;
+  status.className='floatStatus show '+(ok?'ok':'bad');
+  clearTimeout(status.hideTimer);
+  status.hideTimer=setTimeout(()=>status.className='floatStatus',1500);
+}
+
+function renderFloating(){
+  if(!floatWindow||floatWindow.closed) return;
+  const doc=floatWindow.document;
+  const list=doc.getElementById('floatList');
+  const search=doc.getElementById('floatSearch');
+  if(!list||!search) return;
+  const q=search.value.trim().toLowerCase();
+  const hits=ITEMS.filter(it=>(it.name+' '+it.text+' '+(it.memo||'')+' '+(it.folder||'')).toLowerCase().includes(q));
+  list.innerHTML='';
+  if(!hits.length){
+    const empty=doc.createElement('div'); empty.className='floatEmpty'; empty.textContent=q?'Keine Treffer.':'Noch keine Textbausteine.'; list.appendChild(empty); return;
+  }
+  hits.forEach(it=>{
+    const row=doc.createElement('div'); row.className='floatRow';
+    const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title='Makrotext kopieren';
+    const name=doc.createElement('span'); name.className='floatName'; name.textContent=it.name||'Ohne Namen';
+    const text=doc.createElement('span'); text.className='floatPreview'; text.textContent=preview(it.text)||'Leerer Makrotext';
+    main.append(name,text);
+    main.addEventListener('click',async ()=>{
+      const ok=await copyText(it.text,floatWindow);
+      setFloatingStatus(ok?'Makro kopiert':'Kopieren fehlgeschlagen',ok);
+    });
+    const memo=doc.createElement('button'); memo.className='floatMemo'; memo.type='button'; memo.textContent='Memo';
+    memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
+    memo.addEventListener('click',async ()=>{
+      const ok=await copyText(it.memo,floatWindow);
+      setFloatingStatus(ok?'Memo kopiert':'Kopieren fehlgeschlagen',ok);
+    });
+    row.append(main,memo); list.appendChild(row);
+  });
+}
+
+async function openFloatingWindow(){
+  if(floatWindow&&!floatWindow.closed){ floatWindow.focus(); return; }
+  if(!('documentPictureInPicture' in window)){
+    toast('Schwebefenster wird von diesem Edge nicht unterstützt',false); return;
+  }
+  try{
+    const pip=await documentPictureInPicture.requestWindow({width:430,height:620});
+    floatWindow=pip;
+    pip.document.title='Snippet-Makro';
+    pip.document.head.innerHTML='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+    const style=pip.document.createElement('style');
+    style.textContent=`
+      :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardh:#2f3542;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff}
+      *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:radial-gradient(600px 300px at 15% -10%,rgba(90,162,255,.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;overflow:hidden}
+      .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;gap:9px;padding:1px 2px 10px}.floatMark{width:25px;height:25px;border-radius:8px;background:linear-gradient(135deg,#ff235e,#7c5cff);box-shadow:0 4px 12px rgba(255,35,94,.25)}.floatTitle{font-size:14px;font-weight:750}.floatHint{margin-left:auto;color:var(--sub);font-size:11px}
+      .floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:8px}.floatSearch:focus{border-color:var(--accent)}
+      .floatList{min-height:0;overflow-y:auto;padding:0 1px 7px}.floatList::-webkit-scrollbar{width:9px}.floatList::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--bg)}
+      .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:10px;overflow:hidden;margin:6px 0}.floatRow:hover{background:var(--cardh)}button{font-family:inherit}
+      .floatMain{flex:4 1 80%;min-width:0;border:0;background:transparent;color:var(--text);padding:9px 10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}.floatMain:hover{background:rgba(255,255,255,.035)}.floatName,.floatPreview{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.floatName{font-size:13.5px;font-weight:650}.floatPreview{color:var(--sub);font-size:11.5px}
+      .floatMemo{flex:0 0 20%;min-width:64px;border:0;border-left:1px solid var(--line);background:rgba(90,162,255,.08);color:#bcd9ff;font-size:12px;font-weight:750;cursor:pointer}.floatMemo:hover:not(:disabled){background:rgba(90,162,255,.2);color:#fff}.floatMemo:disabled{color:#697385;background:rgba(255,255,255,.025);cursor:default}
+      .floatEmpty{text-align:center;color:var(--sub);font-size:13px;padding:28px 10px}.floatStatus{position:fixed;left:50%;bottom:12px;transform:translate(-50%,12px);opacity:0;pointer-events:none;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:650;transition:.16s;white-space:nowrap}.floatStatus.show{opacity:1;transform:translate(-50%,0)}.floatStatus.ok{background:#12351f;border:1px solid #2f7a4a;color:#c7f5d6}.floatStatus.bad{background:#3a1f12;border:1px solid #7a4a2f;color:#f5d9c7}
+    `;
+    pip.document.head.appendChild(style);
+    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><span class="floatMark"></span><span class="floatTitle">Snippet-Makro</span><span class="floatHint">Klick kopiert</span></div><input class="floatSearch" id="floatSearch" type="search" placeholder="Makros und Memos durchsuchen …" spellcheck="false"><div class="floatList" id="floatList"></div><div class="floatStatus" id="floatStatus"></div></main>';
+    pip.document.getElementById('floatSearch').addEventListener('input',renderFloating);
+    pip.addEventListener('pagehide',()=>{
+      if(floatWindow===pip) floatWindow=null;
+      floatButton.classList.remove('on');
+      floatButton.title='Schwebefenster öffnen';
+    },{once:true});
+    floatButton.classList.add('on');
+    floatButton.title='Schwebefenster schließen';
+    renderFloating();
+  }catch(error){
+    if(error&&error.name!=='AbortError') toast('Schwebefenster konnte nicht geöffnet werden',false);
+  }
+}
+
+floatButton.addEventListener('click',()=>{
+  if(floatWindow&&!floatWindow.closed){ floatWindow.close(); return; }
+  openFloatingWindow();
+});
 
 // Ablegen auf der freien Listenfläche verschiebt den Eintrag aus dem Ordner heraus
 const listEl=document.getElementById('list');
