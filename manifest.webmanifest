@@ -1,14 +1,14 @@
 {
-  "name": "Snippet-Makro",
+  "name": "Snippet Makro",
   "short_name": "Snippets",
-  "description": "Lokales Offline-Menü für Textbausteine, Memos und Kontakte",
+  "description": "Offline menu for snippets, memos, and contacts",
   "id": "./",
   "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0e1015",
   "theme_color": "#0e1015",
-  "lang": "de-DE",
+  "lang": "en-US",
   "icons": [
     {
       "src": "./snippet-logo-192.png",

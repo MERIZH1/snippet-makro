@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Lokales Offline-Menü für Textbausteine, Memos und Kontakte">
+<meta name="description" content="Offline menu for snippets, memos, and contacts">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <script>
  if(!window.matchMedia('(display-mode: standalone)').matches &&
@@ -10,7 +10,7 @@
    window.location.replace('./?download=1');
  }
 </script>
-<title>Snippet-Makro</title>
+<title>Snippet Makro</title>
 <meta name="theme-color" content="#0e1015">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./snippet-logo-192.png">
@@ -36,14 +36,19 @@
  .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .tbtn:hover{background:var(--panel2);color:var(--text)}
  .tbtn.on{background:rgba(90,162,255,.16);color:#bcd9ff;border-color:rgba(90,162,255,.35)}
- .search{margin:0 14px 10px}
+ .search{position:relative;margin:0 14px 10px}
  .search input{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);
-   padding:9px 12px;font-size:14px;outline:none}
+   padding:9px 38px 9px 12px;font-size:14px;outline:none}
  .search input:focus{border-color:var(--accent)}
- .languageBar{display:flex;align-items:center;gap:8px;margin:0 14px 9px;color:var(--sub);font-size:12px}
- .languageBar label{white-space:nowrap}
- .languageBar select{flex:1;min-width:0;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:7px 9px;font:inherit;outline:none}
+ .searchClear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--sub);font-size:18px;line-height:1;font-family:inherit;cursor:pointer}
+ .searchClear:hover{background:var(--panel2);color:var(--text)}
+ .searchClear[hidden]{display:none}
+ .languageBar{position:relative;display:flex;align-items:center;margin:0 14px 9px;color:var(--sub);font-size:12px}
+ .languageBar::after,.selectWrap::after{content:"";position:absolute;right:13px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(45deg);pointer-events:none}
+ .languageBar select,.settingsSelect{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:8px 36px 8px 11px;font:inherit;outline:none}
  .languageBar select:focus{border-color:var(--accent)}
+ .selectWrap{position:relative;width:100%}
+ .settingsSelect:focus{border-color:var(--accent)}
  .list{overflow-y:auto;padding:2px 10px 12px}
  .list::-webkit-scrollbar{width:10px}
  .list::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--panel)}
@@ -121,6 +126,8 @@
  .helpGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
  .helpItem{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
  .helpItem strong{display:block;font-size:13px;margin-bottom:3px;color:#dce8ff}.helpItem span{display:block;color:var(--sub);font-size:12px;line-height:1.4}
+ .feedbackLink{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 0;font-size:12px;color:var(--sub)}
+ .feedbackLink a{color:#bcd9ff;text-decoration:none;font-weight:650}.feedbackLink a:hover{text-decoration:underline;color:#fff}
  .translationModal{max-width:min(96vw,760px)}
  .translationModal textarea{min-height:190px}
  @media(max-width:520px){.helpGrid{grid-template-columns:1fr}}
@@ -139,85 +146,85 @@
  <div class="panel">
    <div class="head">
      <img class="appLogo" src="snippet-logo-192.png" alt="">
-     <div class="title">Snippet-Makro</div>
-     <button class="tbtn" id="btnFloat" title="Schwebefenster öffnen" aria-label="Schwebefenster öffnen">
+     <div class="title" data-i18n="appTitle">Snippet Makro</div>
+     <button class="tbtn" id="btnFloat" data-i18n-title="openFloat" data-i18n-aria="openFloat" title="Open floating window" aria-label="Open floating window">
        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="11" y="11" width="7" height="5" rx="1"/></svg>
      </button>
-     <button class="tbtn" id="btnHelp" title="Bedienung erklären" aria-label="Bedienung erklären">?</button>
-     <button class="tbtn" id="btnContacts" title="Telefonbuch" aria-label="Telefonbuch">
+     <button class="tbtn" id="btnHelp" data-i18n-title="help" data-i18n-aria="help" title="Help" aria-label="Help">?</button>
+     <button class="tbtn" id="btnContacts" data-i18n-title="contacts" data-i18n-aria="contacts" title="Contacts" aria-label="Contacts">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
      </button>
-     <button class="tbtn" id="btnNew" title="Neuen Textbaustein anlegen">＋</button>
-     <button class="tbtn" id="btnEdit" title="Bearbeitungsmodus">✎</button>
-     <button class="tbtn" id="btnInstall" title="Als App installieren">⇩</button>
-     <button class="tbtn" id="btnExport" title="Alle Daten sichern (.json)">⤓</button>
-     <button class="tbtn" id="btnImport" title="Sicherung importieren (.json)">⤒</button>
-     <input id="fileImport" type="file" accept="application/json,.json" style="display:none">
+     <button class="tbtn" id="btnNew" data-i18n-title="newSnippet" title="New snippet">＋</button>
+     <button class="tbtn" id="btnEdit" data-i18n-title="editMode" title="Edit mode">✎</button>
+     <button class="tbtn" id="btnInstall" data-i18n-title="install" title="Install as an app">⇩</button>
+     <button class="tbtn" id="btnSettings" data-i18n-title="settings" data-i18n-aria="settings" title="Settings" aria-label="Settings">
+       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3 .9v.2a1.8 1.8 0 1 1-3.6 0v-.2a1.8 1.8 0 0 0-3-.9l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-.9-3h-.2a1.8 1.8 0 1 1 0-3.6h.2a1.8 1.8 0 0 0 .9-3l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3-.9v-.2a1.8 1.8 0 1 1 3.6 0v.2a1.8 1.8 0 0 0 3 .9l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 .9 3h.2a1.8 1.8 0 1 1 0 3.6h-.2a1.8 1.8 0 0 0-.9 3Z"/></svg>
+     </button>
    </div>
-   <div class="search"><input id="search" type="text" placeholder="Textbausteine durchsuchen …" spellcheck="false"></div>
- <div class="languageBar"><label for="targetLanguage">Übersetzen nach</label><select id="targetLanguage" title="Zielsprache für Makros – Memos bleiben unverändert"><option value="">Originaltext kopieren</option><option value="ar">Arabisch</option><option value="bg">Bulgarisch</option><option value="bn">Bengalisch</option><option value="cs">Tschechisch</option><option value="da">Dänisch</option><option value="de">Deutsch</option><option value="el">Griechisch</option><option value="en">Englisch</option><option value="es">Spanisch</option><option value="fi">Finnisch</option><option value="fr">Französisch</option><option value="he">Hebräisch</option><option value="hi">Hindi</option><option value="hr">Kroatisch</option><option value="hu">Ungarisch</option><option value="id">Indonesisch</option><option value="it">Italienisch</option><option value="ja">Japanisch</option><option value="kn">Kannada</option><option value="ko">Koreanisch</option><option value="lt">Litauisch</option><option value="mr">Marathi</option><option value="nl">Niederländisch</option><option value="no">Norwegisch</option><option value="pl">Polnisch</option><option value="pt">Portugiesisch</option><option value="ro">Rumänisch</option><option value="ru">Russisch</option><option value="sk">Slowakisch</option><option value="sl">Slowenisch</option><option value="sv">Schwedisch</option><option value="ta">Tamil</option><option value="te">Telugu</option><option value="th">Thailändisch</option><option value="tr">Türkisch</option><option value="uk">Ukrainisch</option><option value="vi">Vietnamesisch</option><option value="zh">Chinesisch</option><option value="zh-Hant">Chinesisch (traditionell)</option></select></div>
+   <div class="search"><input id="search" data-i18n-placeholder="search" type="text" placeholder="Search snippets…" spellcheck="false"><button class="searchClear" id="searchClear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button></div>
+   <div class="languageBar"><select id="targetLanguage" data-i18n-title="targetTitle" data-i18n-aria="target" title="Choose a translation language; leave unchanged to copy the original" aria-label="Translate to"></select></div>
    <div class="list" id="list"></div>
- <div class="foot">Klick → kopiert; Zielsprache wählen → übersetzt und kopiert. Memos bleiben unverändert.</div>
+ <div class="foot" data-i18n="footer">Click a snippet to copy it. Choose a target language to translate and copy. Memos are never translated.</div>
  </div>
 
- <div class="toast" id="toast">✓ Kopiert – jetzt Strg+V drücken</div>
+ <div class="toast" id="toast" data-i18n="copied">✓ Copied — press Ctrl+V</div>
 
  <div class="ov" id="ov">
    <div class="modal">
-     <h3 id="mTitle">Textbaustein bearbeiten</h3>
-     <label>Name</label>
+     <h3 id="mTitle">Edit snippet</h3>
+     <label data-i18n="name">Name</label>
      <input id="mName" type="text" spellcheck="false">
-     <label>Ordner (leer = kein Ordner)</label>
+     <label data-i18n="folder">Folder (leave blank for none)</label>
      <input id="mFolder" type="text" spellcheck="false">
-     <label>Text</label>
-     <div class="linkTools"><input id="mLinkLabel" type="text" placeholder="Linktext" aria-label="Anzeigetext des Links"><input id="mLinkUrl" type="url" placeholder="https://… oder mailto:…" aria-label="Link-Adresse"><button class="btn" id="mInsertLink" type="button">↗ Link einfügen</button></div>
+     <label data-i18n="text">Text</label>
+     <div class="linkTools"><input id="mLinkLabel" data-i18n-placeholder="linkText" data-i18n-aria="linkText" type="text" placeholder="Link text" aria-label="Link text"><input id="mLinkUrl" data-i18n-placeholder="linkAddress" data-i18n-aria="linkAddress" type="url" placeholder="https://… or mailto:…" aria-label="Link address"><button class="btn" id="mInsertLink" data-i18n="insertLink" type="button">↗ Insert link</button></div>
      <textarea id="mText" spellcheck="false"></textarea>
      <label>Memo</label>
-     <textarea id="mMemo" spellcheck="false" placeholder="Zusätzlichen kopierbaren Memo-Text eintragen …"></textarea>
+     <textarea id="mMemo" data-i18n-placeholder="memoPlaceholder" spellcheck="false" placeholder="Optional text copied separately…"></textarea>
      <div class="acts">
-       <button class="btn primary" id="mSave">Speichern</button>
-       <button class="btn danger" id="mDelete">Löschen</button>
+       <button class="btn primary" id="mSave" data-i18n="save">Save</button>
+       <button class="btn danger" id="mDelete" data-i18n="delete">Delete</button>
        <div class="grow"></div>
-       <button class="btn" id="mCancel">Abbrechen</button>
+       <button class="btn" id="mCancel" data-i18n="cancel">Cancel</button>
      </div>
    </div>
  </div>
 
  <div class="ov" id="translationOv">
    <div class="modal translationModal">
-     <h3>Übersetzung kopieren</h3>
-     <p style="color:var(--sub);font-size:13px;margin:-4px 0 10px">Der Browser hat das automatische Kopieren blockiert. Die Übersetzung bleibt hier auf deinem Gerät.</p>
+     <h3 data-i18n="translationTitle">Copy translation</h3>
+     <p data-i18n="translationBlocked" style="color:var(--sub);font-size:13px;margin:-4px 0 10px">Automatic copying was blocked by the browser. Your translation stays on this device.</p>
      <textarea id="translationText" readonly spellcheck="false"></textarea>
-     <div class="acts"><button class="btn primary" id="translationCopy">Übersetzung kopieren</button><div class="grow"></div><button class="btn" id="translationClose">Schließen</button></div>
+     <div class="acts"><button class="btn primary" id="translationCopy" data-i18n="copyTranslation">Copy translation</button><div class="grow"></div><button class="btn" id="translationClose" data-i18n="close">Close</button></div>
    </div>
  </div>
 
  <div class="ov" id="contactsOv">
    <div class="modal phoneModal">
      <div class="phoneTitlebar">
-       <div><h3>Telefonbuch</h3><p>Telefonnummer anklicken, um sie zu kopieren.</p></div>
-       <button class="btn primary" id="contactNew">＋ Kontakt</button>
+       <div><h3 data-i18n="contactsTitle">Contacts</h3><p data-i18n="phoneClick">Click a phone number to copy it.</p></div>
+       <button class="btn primary" id="contactNew" data-i18n="newContact">＋ Contact</button>
      </div>
-     <div class="contactCols"><span>Name</span><span>Telefonnummer</span><span>Firma</span><span></span></div>
+     <div class="contactCols"><span data-i18n="name">Name</span><span data-i18n="phoneHeader">Phone number</span><span data-i18n="companyHeader">Company</span><span></span></div>
      <div class="contactsList" id="contactsList"></div>
-     <div class="acts"><div class="grow"></div><button class="btn" id="contactsClose">Schließen</button></div>
+     <div class="acts"><div class="grow"></div><button class="btn" id="contactsClose" data-i18n="close">Close</button></div>
    </div>
  </div>
 
  <div class="ov" id="contactEditOv">
    <div class="modal" style="max-width:min(96vw,520px)">
-     <h3 id="contactEditTitle">Kontakt bearbeiten</h3>
-     <label for="contactName">Name</label>
+     <h3 id="contactEditTitle">Edit contact</h3>
+     <label for="contactName" data-i18n="name">Name</label>
      <input id="contactName" type="text" autocomplete="off" spellcheck="false">
-     <label for="contactPhone">Telefonnummer</label>
+     <label for="contactPhone" data-i18n="phone">Phone number</label>
      <input id="contactPhone" type="tel" autocomplete="off" spellcheck="false">
-     <label for="contactCompany">Firma (optional)</label>
+     <label for="contactCompany" data-i18n="company">Company (optional)</label>
      <input id="contactCompany" type="text" autocomplete="off" spellcheck="false">
      <div class="acts">
-       <button class="btn primary" id="contactSave">Speichern</button>
-       <button class="btn danger" id="contactDelete">Löschen</button>
+       <button class="btn primary" id="contactSave" data-i18n="save">Save</button>
+       <button class="btn danger" id="contactDelete" data-i18n="delete">Delete</button>
        <div class="grow"></div>
-       <button class="btn" id="contactCancel">Abbrechen</button>
+       <button class="btn" id="contactCancel" data-i18n="cancel">Cancel</button>
      </div>
    </div>
  </div>
@@ -226,21 +233,38 @@
    <div class="modal helpModal">
      <div class="helpHead">
        <span class="helpIcon">?</span>
-       <div><h3>So funktioniert Snippet-Makro</h3><p>Die wichtigsten Funktionen auf einen Blick.</p></div>
+       <div><h3 data-i18n="helpTitle">How Snippet Makro works</h3><p data-i18n="helpSubtitle">A quick guide to the main features.</p></div>
      </div>
      <div class="helpGrid">
-       <div class="helpItem"><strong>Makro kopieren</strong><span>Linken Bereich eines Eintrags anklicken. Der Makrotext liegt danach in der Zwischenablage.</span></div>
-       <div class="helpItem"><strong>Memo kopieren</strong><span>Rechts auf <b>Memo</b> klicken. Das Memo wird getrennt vom Makrotext kopiert.</span></div>
-       <div class="helpItem"><strong>Übersetzen</strong><span>Zielsprache auswählen und ein Makro anklicken. Edge/Chrome übersetzt kostenlos direkt auf dem Gerät; das Sprachmodell muss einmalig online geladen werden. Memos bleiben außen vor.</span></div>
-       <div class="helpItem"><strong>Hyperlinks</strong><span>Im Bearbeiten-Fenster Linktext und Adresse eintragen und „Link einfügen“ anklicken. Beim Kopieren wird daraus ein klickbarer Link.</span></div>
-       <div class="helpItem"><strong>Makros anlegen</strong><span>Mit <b>＋</b> einen Namen, Ordner, Text und optional ein Memo speichern.</span></div>
-       <div class="helpItem"><strong>Ordner</strong><span>Ordnerüberschriften anklicken, um sie auf- oder zuzuklappen. Ungeordnete Makros stehen oben.</span></div>
-       <div class="helpItem"><strong>Sortieren</strong><span>Mit <b>⠿</b> einen Eintrag per Ziehen verschieben oder in einen Ordner ziehen.</span></div>
-       <div class="helpItem"><strong>Schwebefenster</strong><span>Das Fenster-Symbol öffnet die Kopieransicht über anderen Programmen. Die Reihenfolge bleibt identisch.</span></div>
-       <div class="helpItem"><strong>Telefonbuch</strong><span>Telefonnummer anklicken, um sie zu kopieren. Kontakte lassen sich jederzeit bearbeiten.</span></div>
-       <div class="helpItem"><strong>Sicherung</strong><span><b>⤓</b> exportiert alle Daten, <b>⤒</b> importiert eine vorhandene JSON-Sicherung.</span></div>
+       <div class="helpItem"><strong data-i18n="helpCopyTitle">Copy a snippet</strong><span data-i18n="helpCopyBody">Click the left side of an item. Its text is copied to the clipboard.</span></div>
+       <div class="helpItem"><strong data-i18n="helpMemoTitle">Copy a memo</strong><span data-i18n="helpMemoBody">Click Memo on the right. The memo is copied separately.</span></div>
+       <div class="helpItem"><strong data-i18n="helpTranslateTitle">Translate</strong><span data-i18n="helpTranslateBody">Choose a target language and click a snippet. Edge/Chrome translates on this device. The language model may need a one-time download. Memos are never translated.</span></div>
+       <div class="helpItem"><strong data-i18n="helpLinksTitle">Hyperlinks</strong><span data-i18n="helpLinksBody">Paste text from an email or webpage with Ctrl+V: linked words keep their links. Or enter link text and an address, then click Insert link.</span></div>
+       <div class="helpItem"><strong data-i18n="helpAddTitle">Add snippets</strong><span data-i18n="helpAddBody">Click ＋ to save a name, folder, text, and optional memo.</span></div>
+       <div class="helpItem"><strong data-i18n="helpFoldersTitle">Folders</strong><span data-i18n="helpFoldersBody">Click a folder heading to expand or collapse it. Unfiled snippets appear at the top.</span></div>
+       <div class="helpItem"><strong data-i18n="helpReorderTitle">Reorder</strong><span data-i18n="helpReorderBody">Drag an item using ⠿ to move it or place it in a folder.</span></div>
+       <div class="helpItem"><strong data-i18n="helpFloatTitle">Floating window</strong><span data-i18n="helpFloatBody">The window icon opens the copy view above other apps. The order stays the same.</span></div>
+       <div class="helpItem"><strong data-i18n="helpContactsTitle">Contacts</strong><span data-i18n="helpContactsBody">Click a phone number to copy it. Contacts can be edited at any time.</span></div>
+       <div class="helpItem"><strong data-i18n="helpBackupTitle">Backups</strong><span data-i18n="helpBackupBody">Open ⚙ to export all data or import a JSON backup.</span></div>
      </div>
-     <div class="acts"><div class="grow"></div><button class="btn" id="helpClose">Schließen</button></div>
+     <p class="feedbackLink"><a href="https://github.com/MERIZH1/snippet-makro/issues" target="_blank" rel="noopener">Feedback &amp; questions</a><span>GitHub sign-in may be required. Feedback is public.</span></p>
+     <div class="acts"><div class="grow"></div><button class="btn" id="helpClose" data-i18n="close">Close</button></div>
+   </div>
+ </div>
+
+ <div class="ov" id="settingsOv">
+   <div class="modal" style="max-width:min(96vw,560px)">
+     <h3 data-i18n="settingsTitle">Settings</h3>
+     <label for="sourceLanguage" data-i18n="sourceLanguage">Source language</label>
+     <div class="selectWrap"><select id="sourceLanguage" class="settingsSelect"></select></div>
+     <p data-i18n="sourceHelp" style="color:var(--sub);font-size:12px;line-height:1.45;margin:7px 0 16px">Automatic detection is the default. If a snippet is too short to identify reliably, choose its source language here. Invalid translation codes are never copied.</p>
+     <label data-i18n="backup">Data backup</label>
+     <div class="acts" style="margin-top:6px">
+       <button class="btn" id="btnExport" data-i18n="export">Export backup (.json)</button>
+       <button class="btn" id="btnImport" data-i18n="import">Import backup (.json)</button>
+       <input id="fileImport" type="file" accept="application/json,.json" style="display:none">
+     </div>
+     <div class="acts"><div class="grow"></div><button class="btn" id="settingsClose" data-i18n="close">Close</button></div>
    </div>
  </div>
 
@@ -248,14 +272,65 @@
 const KEY = 'snippetMenu.items.v1';
 const CONTACT_KEY = 'snippetMenu.contacts.v1';
 const TRANSLATION_KEY = 'snippetMenu.translation.target.v1';
+const SOURCE_LANGUAGE_KEY = 'snippetMenu.translation.source.v1';
 const LANGUAGES = [
-  ['ar','Arabisch'],['bg','Bulgarisch'],['bn','Bengalisch'],['cs','Tschechisch'],['da','Dänisch'],['de','Deutsch'],['el','Griechisch'],['en','Englisch'],['es','Spanisch'],['fi','Finnisch'],['fr','Französisch'],['he','Hebräisch'],['hi','Hindi'],['hr','Kroatisch'],['hu','Ungarisch'],['id','Indonesisch'],['it','Italienisch'],['ja','Japanisch'],['kn','Kannada'],['ko','Koreanisch'],['lt','Litauisch'],['mr','Marathi'],['nl','Niederländisch'],['no','Norwegisch'],['pl','Polnisch'],['pt','Portugiesisch'],['ro','Rumänisch'],['ru','Russisch'],['sk','Slowakisch'],['sl','Slowenisch'],['sv','Schwedisch'],['ta','Tamil'],['te','Telugu'],['th','Thailändisch'],['tr','Türkisch'],['uk','Ukrainisch'],['vi','Vietnamesisch'],['zh','Chinesisch'],['zh-Hant','Chinesisch (traditionell)']
+  ['ar','Arabic'],['bg','Bulgarian'],['bn','Bengali'],['cs','Czech'],['da','Danish'],['de','German'],['el','Greek'],['en','English'],['es','Spanish'],['fi','Finnish'],['fr','French'],['he','Hebrew'],['hi','Hindi'],['hr','Croatian'],['hu','Hungarian'],['id','Indonesian'],['it','Italian'],['ja','Japanese'],['kn','Kannada'],['ko','Korean'],['lt','Lithuanian'],['mr','Marathi'],['nl','Dutch'],['no','Norwegian'],['pl','Polish'],['pt','Portuguese'],['ro','Romanian'],['ru','Russian'],['sk','Slovak'],['sl','Slovenian'],['sv','Swedish'],['ta','Tamil'],['te','Telugu'],['th','Thai'],['tr','Turkish'],['uk','Ukrainian'],['vi','Vietnamese'],['zh','Chinese'],['zh-Hant','Chinese (Traditional)']
 ];
+const UI_TEXT={
+  en:{appTitle:'Snippet Makro',description:'Offline menu for snippets, memos, and contacts',openFloat:'Open floating window',closeFloat:'Close floating window',help:'Help',contacts:'Contacts',newSnippet:'New snippet',editMode:'Edit mode',install:'Install as an app',settings:'Settings',search:'Search snippets…',target:'Translate to',targetTitle:'Target language for snippets; memos are never translated',original:'Copy original',footer:'Click a snippet to copy it. Choose a target language to translate and copy. Memos are never translated.',copied:'✓ Copied — press Ctrl+V',name:'Name',folder:'Folder (leave blank for none)',text:'Text',linkText:'Link text',linkAddress:'Link address',insertLink:'↗ Insert link',memoPlaceholder:'Optional text copied separately…',save:'Save',delete:'Delete',cancel:'Cancel',translationTitle:'Copy translation',translationBlocked:'Automatic copying was blocked by the browser. Your translation stays on this device.',copyTranslation:'Copy translation',close:'Close',contactsTitle:'Contacts',phoneClick:'Click a phone number to copy it.',newContact:'＋ Contact',phoneHeader:'Phone number',companyHeader:'Company',editContact:'Edit contact',phone:'Phone number',company:'Company (optional)',helpTitle:'How Snippet Makro works',helpSubtitle:'A quick guide to the main features.',helpCopyTitle:'Copy a snippet',helpCopyBody:'Click the left side of an item. Its text is copied to the clipboard.',helpMemoTitle:'Copy a memo',helpMemoBody:'Click Memo on the right. The memo is copied separately.',helpTranslateTitle:'Translate',helpTranslateBody:'Choose a target language and click a snippet. Edge/Chrome translates on this device. The language model may need a one-time download. Memos are never translated. Use Settings to choose the source language if detection is uncertain.',helpLinksTitle:'Hyperlinks',helpLinksBody:'Paste text from an email or webpage with Ctrl+V: linked words keep their links. Or enter link text and an address, then click Insert link.',helpAddTitle:'Add snippets',helpAddBody:'Click ＋ to save a name, folder, text, and optional memo.',helpFoldersTitle:'Folders',helpFoldersBody:'Click a folder heading to expand or collapse it. Unfiled snippets appear at the top.',helpReorderTitle:'Reorder',helpReorderBody:'Drag an item using ⠿ to move it or place it in a folder.',helpFloatTitle:'Floating window',helpFloatBody:'The window icon opens the copy view above other apps. The order stays the same.',helpContactsTitle:'Contacts',helpContactsBody:'Click a phone number to copy it. Contacts can be edited at any time.',helpBackupTitle:'Backups',helpBackupBody:'Open ⚙ to export all data or import a JSON backup.',settingsTitle:'Settings',interfaceLanguage:'Interface language',sourceLanguage:'Source language',autoDetect:'Detect automatically',sourceHelp:'Automatic detection is the default. If a snippet is too short to identify reliably, choose its source language here. Invalid translation codes are never copied.',backup:'Data backup',export:'Export backup (.json)',import:'Import backup (.json)',searchEmpty:'No results.',snippetsEmpty:'No snippets yet.<br>Click ＋ to add one or import a backup with ⚙.',contactsEmpty:'No contacts yet.<br>Click ＋ Contact to add one.',newSnippetTitle:'New snippet',editSnippetTitle:'Edit snippet',newContactTitle:'New contact',deleteSnippetConfirm:'Delete this snippet?',deleteContactConfirm:'Delete this contact?',linkPasted:'Text pasted — hyperlink preserved',linkLabelMissing:'Enter link text.',linkUrlInvalid:'Enter a valid http, https, mailto, or tel address.',translationCopyDone:'Translation copied — press Ctrl+V',copyFailedSelect:'Copy failed — select the text and press Ctrl+C',copyDone:'Copied — press Ctrl+V',copyFailed:'Copy failed',snippetCopied:'Snippet copied',memoCopied:'Memo copied',noMemo:'No memo saved',copyMemo:'Copy memo',phoneCopied:'Phone number copied',contactSaved:'Contact saved',contactDeleted:'Contact deleted',snippetDeleted:'Snippet deleted',editStarted:'Edit mode: click a snippet',editStopped:'Edit mode off',invalidFile:'Invalid file',oldBackupImported:'Legacy snippet backup imported',backupImported:'Backup imported',appInstalled:'App installed',floatUnsupported:'This version of Edge does not support the floating window.',floatOpenFailed:'Could not open the floating window.',floatTitle:'Snippet Makro',floatHint:'Snippets, memos, and folders',floatSearch:'Search snippets and memos…',floatCopyTitle:'Copy translation',floatCopy:'Copy',floatTranslationCopied:'Translation copied',floatMoved:'Drag to move or place in a folder',translateProgress:'Translating…',translationPreparing:'Preparing translation…',languageUnavailable:'This language pair is not available in Edge/Chrome.',translatorUnavailable:'This Edge/Chrome version does not support local translation.',detectorUnavailable:'The source language could not be detected. Open Settings and choose it manually. Nothing was copied.',tooShort:'This text is too short to identify its source language reliably. Open Settings and select it manually. Nothing was copied.',badTranslation:'The browser returned an invalid TM placeholder instead of a translation. Nothing was copied. Try again or choose the source language in Settings.',emptyTranslation:'The browser did not return a translation. Nothing was copied.',downloadModel:'Downloading language model ({percent}%)…',translated:'Translated and copied',translatedCopy:'Translated — copy it here',translationFailed:'Translation failed',installHint:'In Edge: ⋯ → Apps → Install this site as an app',copyOriginalFloat:'Copy original'},
+  de:{appTitle:'Snippet-Makro',description:'Offline-Menü für Textbausteine, Memos und Kontakte',openFloat:'Schwebefenster öffnen',closeFloat:'Schwebefenster schließen',help:'Hilfe',contacts:'Telefonbuch',newSnippet:'Neuen Textbaustein anlegen',editMode:'Bearbeitungsmodus',install:'Als App installieren',settings:'Einstellungen',search:'Textbausteine durchsuchen …',target:'Übersetzen nach',targetTitle:'Zielsprache für Textbausteine; Memos werden nie übersetzt',original:'Originaltext kopieren',footer:'Textbaustein anklicken zum Kopieren. Zielsprache wählen, um zu übersetzen und zu kopieren. Memos bleiben unverändert.',copied:'✓ Kopiert — jetzt Strg+V drücken',name:'Name',folder:'Ordner (leer = kein Ordner)',text:'Text',linkText:'Linktext',linkAddress:'Link-Adresse',insertLink:'↗ Link einfügen',memoPlaceholder:'Zusätzlichen Memo-Text separat kopieren …',save:'Speichern',delete:'Löschen',cancel:'Abbrechen',translationTitle:'Übersetzung kopieren',translationBlocked:'Der Browser hat das automatische Kopieren blockiert. Die Übersetzung bleibt auf diesem Gerät.',copyTranslation:'Übersetzung kopieren',close:'Schließen',contactsTitle:'Telefonbuch',phoneClick:'Telefonnummer anklicken, um sie zu kopieren.',newContact:'＋ Kontakt',phoneHeader:'Telefonnummer',companyHeader:'Firma',editContact:'Kontakt bearbeiten',phone:'Telefonnummer',company:'Firma (optional)',helpTitle:'So funktioniert Snippet-Makro',helpSubtitle:'Die wichtigsten Funktionen auf einen Blick.',helpCopyTitle:'Textbaustein kopieren',helpCopyBody:'Linke Seite eines Eintrags anklicken. Der Text wird in die Zwischenablage kopiert.',helpMemoTitle:'Memo kopieren',helpMemoBody:'Rechts auf Memo klicken. Das Memo wird separat kopiert.',helpTranslateTitle:'Übersetzen',helpTranslateBody:'Zielsprache wählen und einen Textbaustein anklicken. Edge/Chrome übersetzt auf diesem Gerät. Das Sprachmodell muss eventuell einmalig heruntergeladen werden. Memos werden nie übersetzt. Bei unsicherer Erkennung die Ausgangssprache in den Einstellungen festlegen.',helpLinksTitle:'Hyperlinks',helpLinksBody:'Text aus einer E-Mail oder Webseite mit Strg+V einfügen: Verlinkte Wörter behalten ihren Link. Oder Linktext und Adresse eintragen und „Link einfügen“ anklicken.',helpAddTitle:'Textbausteine anlegen',helpAddBody:'Mit ＋ Namen, Ordner, Text und optionales Memo speichern.',helpFoldersTitle:'Ordner',helpFoldersBody:'Ordnerüberschrift anklicken, um sie auf- oder zuzuklappen. Einträge ohne Ordner stehen oben.',helpReorderTitle:'Sortieren',helpReorderBody:'Eintrag mit ⠿ verschieben oder in einen Ordner ziehen.',helpFloatTitle:'Schwebefenster',helpFloatBody:'Das Fenstersymbol öffnet die Kopieransicht über anderen Apps. Die Reihenfolge bleibt gleich.',helpContactsTitle:'Telefonbuch',helpContactsBody:'Telefonnummer anklicken, um sie zu kopieren. Kontakte lassen sich jederzeit bearbeiten.',helpBackupTitle:'Sicherungen',helpBackupBody:'Über ⚙ alle Daten exportieren oder eine JSON-Sicherung importieren.',settingsTitle:'Einstellungen',interfaceLanguage:'Menüsprache',sourceLanguage:'Ausgangssprache',autoDetect:'Automatisch erkennen',sourceHelp:'Automatische Erkennung ist voreingestellt. Wenn ein Text zu kurz zur sicheren Erkennung ist, hier die Ausgangssprache wählen. Ungültige Übersetzungscodes werden nie kopiert.',backup:'Datensicherung',export:'Sicherung exportieren (.json)',import:'Sicherung importieren (.json)',searchEmpty:'Keine Treffer.',snippetsEmpty:'Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⚙ eine Sicherung importieren.',contactsEmpty:'Noch keine Kontakte.<br>Mit ＋ Kontakt einen Eintrag anlegen.',newSnippetTitle:'Neuer Textbaustein',editSnippetTitle:'Textbaustein bearbeiten',newContactTitle:'Neuer Kontakt',deleteSnippetConfirm:'Diesen Textbaustein löschen?',deleteContactConfirm:'Diesen Kontakt löschen?',linkPasted:'Text eingefügt — Hyperlink übernommen',linkLabelMissing:'Bitte Linktext eintragen.',linkUrlInvalid:'Bitte eine gültige http-, https-, mailto- oder tel-Adresse eintragen.',translationCopyDone:'Übersetzung kopiert — jetzt Strg+V drücken',copyFailedSelect:'Kopieren fehlgeschlagen — Text markieren und Strg+C drücken',copyDone:'Kopiert — jetzt Strg+V drücken',copyFailed:'Kopieren fehlgeschlagen',snippetCopied:'Textbaustein kopiert',memoCopied:'Memo kopiert',noMemo:'Kein Memo hinterlegt',copyMemo:'Memo kopieren',phoneCopied:'Telefonnummer kopiert',contactSaved:'Kontakt gespeichert',contactDeleted:'Kontakt gelöscht',snippetDeleted:'Textbaustein gelöscht',editStarted:'Bearbeitungsmodus: Textbaustein anklicken',editStopped:'Bearbeitungsmodus beendet',invalidFile:'Ungültige Datei',oldBackupImported:'Alte Textbaustein-Sicherung importiert',backupImported:'Sicherung importiert',appInstalled:'App wurde installiert',floatUnsupported:'Dieses Edge unterstützt das Schwebefenster nicht.',floatOpenFailed:'Schwebefenster konnte nicht geöffnet werden.',floatTitle:'Snippet-Makro',floatHint:'Textbausteine, Memos und Ordner',floatSearch:'Textbausteine und Memos durchsuchen …',floatCopyTitle:'Übersetzung kopieren',floatCopy:'Kopieren',floatTranslationCopied:'Übersetzung kopiert',floatMoved:'Verschieben oder in einen Ordner ziehen',translateProgress:'Übersetzung wird erstellt …',translationPreparing:'Übersetzung wird vorbereitet …',languageUnavailable:'Diese Sprachkombination ist in Edge/Chrome nicht verfügbar.',translatorUnavailable:'Diese Edge-/Chrome-Version unterstützt die lokale Übersetzung nicht.',detectorUnavailable:'Ausgangssprache nicht erkannt. Bitte in den Einstellungen manuell auswählen. Es wurde nichts kopiert.',tooShort:'Der Text ist zu kurz, um die Ausgangssprache sicher zu erkennen. Bitte in den Einstellungen manuell auswählen. Es wurde nichts kopiert.',badTranslation:'Der Browser hat einen ungültigen TM-Platzhalter statt einer Übersetzung geliefert. Es wurde nichts kopiert. Bitte erneut versuchen oder die Ausgangssprache in den Einstellungen wählen.',emptyTranslation:'Der Browser hat keine Übersetzung zurückgegeben. Es wurde nichts kopiert.',downloadModel:'Sprachmodell wird geladen ({percent} %) …',translated:'Übersetzt und kopiert',translatedCopy:'Übersetzt — bitte hier kopieren',translationFailed:'Übersetzung fehlgeschlagen',installHint:'In Edge: ⋯ → Apps → Diese Website als App installieren',copyOriginalFloat:'Originaltext kopieren'}
+};
+const uiLanguage='en';
+UI_TEXT.en.clearSearch='Clear search';
+UI_TEXT.en.targetTitle='Choose a target language to translate snippets; leave the first option selected to copy the original. Memos are never translated.';
+function t(key,values={}){ let value=(UI_TEXT[uiLanguage]&&UI_TEXT[uiLanguage][key])||UI_TEXT.en[key]||key; for(const [name,replacement] of Object.entries(values)) value=value.replace(`{${name}}`,String(replacement)); return value; }
+function languageName(code){ return (LANGUAGES.find(([languageCode])=>languageCode===code)||[code,code])[1]; }
+function fillLanguageSelect(select,includeAuto=false,includeOriginal=false){
+  if(!select) return;
+  const selected=select.value; select.replaceChildren();
+  if(includeAuto){ const option=document.createElement('option'); option.value='auto'; option.textContent=t('autoDetect'); select.appendChild(option); }
+  if(includeOriginal){ const option=document.createElement('option'); option.value=''; option.textContent=t('target')+'…'; select.appendChild(option); }
+  LANGUAGES.forEach(([code])=>{ const option=document.createElement('option'); option.value=code; option.textContent=languageName(code); select.appendChild(option); });
+  if(Array.from(select.options).some(option=>option.value===selected)) select.value=selected;
+}
+function applyLanguage(){
+  document.documentElement.lang=uiLanguage;
+  document.title=t('appTitle');
+  const description=document.querySelector('meta[name="description"]'); if(description) description.content=t('description');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title=t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{ el.setAttribute('aria-label',t(el.dataset.i18nAria)); });
+  const target=document.getElementById('targetLanguage'); fillLanguageSelect(target,false,true); if(target) target.value=targetLanguage;
+  const source=document.getElementById('sourceLanguage'); fillLanguageSelect(source,true,false);
+  if(source) source.value=sourceLanguagePreference;
+  if(floatWindow&&!floatWindow.closed) applyFloatingLanguage();
+}
+function applyFloatingLanguage(){
+  if(!floatWindow||floatWindow.closed) return;
+  const doc=floatWindow.document;
+  const set=(id,key)=>{ const el=doc.getElementById(id); if(el) el.textContent=t(key); };
+  doc.title=t('floatTitle'); set('floatTitle', 'appTitle'); set('floatHint','floatHint');
+  set('floatCopyTitle','floatCopyTitle'); set('floatCopyButton','floatCopy'); set('floatCopyClose','close');
+  const search=doc.getElementById('floatSearch'); if(search) search.placeholder=t('floatSearch');
+  const clear=doc.getElementById('floatSearchClear'); if(clear){ clear.title=t('clearSearch'); clear.setAttribute('aria-label',t('clearSearch')); }
+  const select=doc.getElementById('floatLanguage');
+  if(select){
+    const selected=targetLanguage; select.replaceChildren();
+    const original=doc.createElement('option'); original.value=''; original.textContent=t('target')+'…'; select.appendChild(original);
+    LANGUAGES.forEach(([code])=>{ const option=doc.createElement('option'); option.value=code; option.textContent=languageName(code); select.appendChild(option); });
+    select.value=selected;
+    select.setAttribute('aria-label',t('target'));
+    select.title=t('targetTitle');
+  }
+}
 const FOLD = {};            // Ordner -> aufgeklappt
 let editMode = false;
 let editIndex = -1;         // -1 = neu
 let targetLanguage = '';
+let sourceLanguagePreference = 'auto';
 try{ const savedLanguage=localStorage.getItem(TRANSLATION_KEY)||''; if(LANGUAGES.some(([code])=>code===savedLanguage)) targetLanguage=savedLanguage; }catch(e){}
+try{ const savedSource=localStorage.getItem(SOURCE_LANGUAGE_KEY)||'auto'; if(savedSource==='auto'||LANGUAGES.some(([code])=>code===savedSource)) sourceLanguagePreference=savedSource; }catch(e){}
 
 const DEFAULTS = [];
 
@@ -295,7 +370,37 @@ async function copyText(t,targetWindow=window){
   }
 }
 
-const LINK_PATTERN = /\[([^\]]+)\]\(((?:https?:\/\/|mailto:)[^\s)]+)\)/g;
+const LINK_PATTERN = /\[([^\]]+)\]\(((?:https?:\/\/|mailto:|tel:)[^\s)]+)\)/g;
+const SAFE_LINK_PROTOCOLS = new Set(['http:','https:','mailto:','tel:']);
+function safeLinkHref(href){
+  try{
+    const parsed=new URL(String(href||''),document.baseURI);
+    if(!SAFE_LINK_PROTOCOLS.has(parsed.protocol)) return '';
+    return parsed.href.replace(/\)/g,'%29');
+  }catch(e){ return ''; }
+}
+function richPasteToMacroText(html){
+  const Parser=window.DOMParser;
+  if(!Parser) return '';
+  const parsed=new Parser().parseFromString(String(html),'text/html');
+  const blocks=new Set(['ADDRESS','ARTICLE','ASIDE','BLOCKQUOTE','DD','DIV','DL','DT','FIELDSET','FIGCAPTION','FIGURE','FOOTER','H1','H2','H3','H4','H5','H6','HEADER','LI','MAIN','NAV','OL','P','PRE','SECTION','TABLE','TR','UL']);
+  function read(node){
+    if(node.nodeType===Node.TEXT_NODE) return node.nodeValue||'';
+    if(node.nodeType!==Node.ELEMENT_NODE) return '';
+    const tag=node.tagName;
+    if(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','SVG'].includes(tag)) return '';
+    if(tag==='BR') return '\n';
+    const content=Array.from(node.childNodes,read).join('');
+    if(tag==='A'){
+      const href=safeLinkHref(node.getAttribute('href'));
+      const label=content.trim();
+      if(!label||!href) return content;
+      return `[${label.replace(/\[/g,'(').replace(/\]/g,')')}](${href})`;
+    }
+    return blocks.has(tag)?`\n${content}\n`:content;
+  }
+  return read(parsed.body).replace(/[ \t]*\n[ \t]*/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+}
 function macroPlainText(text){
   return String(text).replace(LINK_PATTERN,(_match,label,url)=>`${label} (${url})`);
 }
@@ -331,46 +436,62 @@ async function copyMacroText(text,targetWindow=window){
 
 async function translateMacroText(text,language,onProgress=()=>{},targetWindow=window){
   const TranslatorApi=targetWindow.Translator||window.Translator;
-  if(!TranslatorApi) throw new Error('Diese Edge-/Chrome-Version unterstützt die kostenlose lokale Übersetzung nicht.');
-  const detectionText=String(text).replace(LINK_PATTERN,'$1').replace(/(?:https?:\/\/|mailto:)[^\s]+/g,' ');
-  let sourceLanguage='de';
-  const DetectorApi=targetWindow.LanguageDetector||window.LanguageDetector;
-  if(DetectorApi){
+  if(!TranslatorApi) throw new Error(t('translatorUnavailable'));
+  const detectionText=String(text).replace(LINK_PATTERN,'$1').replace(/(?:https?:\/\/|mailto:|tel:)[^\s]+/g,' ').trim();
+  let sourceLanguage=sourceLanguagePreference;
+  if(sourceLanguage==='auto'){
+    const DetectorApi=targetWindow.LanguageDetector||window.LanguageDetector;
+    if(!DetectorApi) throw new Error(t('detectorUnavailable'));
     let detector;
     try{
       const detectorAvailability=await DetectorApi.availability();
-      if(detectorAvailability!=='unavailable'){
-        detector=await DetectorApi.create();
-        const detected=await detector.detect(detectionText);
-        if(detected&&detected[0]&&detected[0].confidence>=0.35) sourceLanguage=detected[0].detectedLanguage;
+      if(detectorAvailability==='unavailable') throw new Error(t('detectorUnavailable'));
+      detector=await DetectorApi.create();
+      const candidates=await detector.detect(detectionText);
+      const best=candidates&&candidates[0];
+      const minimumConfidence=detectionText.split(/\s+/).length<=3||detectionText.length<24?0.55:0.4;
+      if(!best||best.confidence<minimumConfidence||!LANGUAGES.some(([code])=>code===best.detectedLanguage)){
+        const error=new Error(t('tooShort')); error.code='SOURCE_TOO_SHORT'; throw error;
       }
-    }catch(e){}finally{ if(detector&&detector.destroy) detector.destroy(); }
+      sourceLanguage=best.detectedLanguage;
+    }catch(error){
+      if(error&&error.code==='SOURCE_TOO_SHORT') throw error;
+      throw new Error(t('detectorUnavailable'));
+    }finally{ if(detector&&detector.destroy) detector.destroy(); }
   }
   if(sourceLanguage===language) return text;
   const availability=await TranslatorApi.availability({sourceLanguage,targetLanguage:language});
-  if(availability==='unavailable') throw new Error('Diese Sprachkombination ist in Edge/Chrome nicht verfügbar.');
-  onProgress('Übersetzung wird vorbereitet …');
+  if(availability==='unavailable') throw new Error(t('languageUnavailable'));
+  onProgress(t('translationPreparing'));
   const session=await TranslatorApi.create({
     sourceLanguage,
     targetLanguage:language,
     monitor(m){
       m.addEventListener('downloadprogress',event=>{
         const percent=event.total?Math.round(event.loaded/event.total*100):0;
-        onProgress(`Sprachmodell wird geladen (${percent} %) …`);
+        onProgress(t('downloadModel',{percent}));
       });
     }
   });
   try{
+    async function translateSegment(segment){
+      if(!segment) return '';
+      const result=await session.translate(segment);
+      if(typeof result!=='string'||!result.trim()) throw new Error(t('emptyTranslation'));
+      const badToken=result.match(/\bTM-(?:[A-Z0-9]{3,}-){2,}[A-Z0-9]{3,}\b/i);
+      if(badToken&&!segment.includes(badToken[0])) throw new Error(t('badTranslation'));
+      return result;
+    }
     const source=String(text); let translated='', last=0;
     for(const match of source.matchAll(LINK_PATTERN)){
       const [whole,label,url]=match;
       const before=source.slice(last,match.index);
-      translated+=before ? await session.translate(before) : '';
-      translated+=`[${await session.translate(label)}](${url})`;
+      translated+=before ? await translateSegment(before) : '';
+      translated+=`[${await translateSegment(label)}](${url})`;
       last=match.index+whole.length;
     }
     const remainder=source.slice(last);
-    translated+=remainder ? await session.translate(remainder) : '';
+    translated+=remainder ? await translateSegment(remainder) : '';
     return translated;
   }finally{ if(session.destroy) session.destroy(); }
 }
@@ -392,16 +513,16 @@ async function copyOrTranslate(text,targetWindow=window){
   const report=(message,ok)=>targetWindow===window?toast(message,ok):setFloatingStatus(message,ok);
   if(!targetLanguage){
     const ok=await copyMacroText(text,targetWindow);
-    report(targetWindow===window?(ok?'Kopiert – jetzt Strg+V drücken':'Kopieren fehlgeschlagen'):(ok?'Makro kopiert':'Kopieren fehlgeschlagen'),ok);
+    report(targetWindow===window?(ok?t('copyDone'):t('copyFailed')):(ok?t('snippetCopied'):t('copyFailed')),ok);
     return;
   }
   try{
-    report('Übersetzung wird erstellt …',true);
+    report(t('translateProgress'),true);
     const translated=await translateMacroText(text,targetLanguage,message=>report(message,true),targetWindow);
     const ok=await copyMacroText(translated,targetWindow);
-    if(ok) report('Übersetzt und kopiert',true);
-    else{ showTranslationFallback(translated,targetWindow); report('Übersetzt – bitte noch kopieren',false); }
-  }catch(error){ report(error&&error.message?error.message:'Übersetzung fehlgeschlagen',false); }
+    if(ok) report(t('translated'),true);
+    else{ showTranslationFallback(translated,targetWindow); report(t('translatedCopy'),false); }
+  }catch(error){ report(error&&error.message?error.message:t('translationFailed'),false); }
 }
 
 function setTargetLanguage(language){
@@ -410,6 +531,12 @@ function setTargetLanguage(language){
   const select=document.getElementById('targetLanguage');
   if(select&&select.value!==targetLanguage) select.value=targetLanguage;
   if(floatWindow&&!floatWindow.closed){ const floatingSelect=floatWindow.document.getElementById('floatLanguage'); if(floatingSelect) floatingSelect.value=targetLanguage; }
+}
+function setSourceLanguage(language){
+  sourceLanguagePreference=language==='auto'||LANGUAGES.some(([code])=>code===language)?language:'auto';
+  try{ localStorage.setItem(SOURCE_LANGUAGE_KEY,sourceLanguagePreference); }catch(e){}
+  const select=document.getElementById('sourceLanguage');
+  if(select&&select.value!==sourceLanguagePreference) select.value=sourceLanguagePreference;
 }
 let toastT;
 function toast(msg, ok){
@@ -443,10 +570,10 @@ function rowEl(it, idx, indent, canDrag, q, stripeIndex){
   const row=document.createElement('div'); row.className='row'+(indent?' indent':'')+(stripeIndex%2?' alt':'');
   const main=document.createElement('div'); main.className='rowMain';
   main.innerHTML='<div class="accent"></div><div class="nm">'+highlight(it.name,q)+'</div>'+
-                 (canDrag?'<div class="grip" title="Verschieben oder in einen Ordner ziehen">⠿</div>':'<div class="pen">✎</div>');
+                 (canDrag?'<div class="grip" title="'+t('floatMoved')+'">⠿</div>':'<div class="pen">✎</div>');
   const memo=document.createElement('button'); memo.className='memoBtn'; memo.type='button'; memo.textContent='Memo';
   memo.disabled=!(it.memo||'').length;
-  memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
+  memo.title=memo.disabled?t('noMemo'):t('copyMemo');
   row.append(main,memo);
   main.addEventListener('click', async (e)=>{
     if(e.target.classList.contains('grip')) return;
@@ -456,7 +583,7 @@ function rowEl(it, idx, indent, canDrag, q, stripeIndex){
   memo.addEventListener('click',async e=>{
     e.stopPropagation();
     const ok=await copyText(it.memo);
-    toast(ok?'Memo kopiert – jetzt Strg+V drücken':'Kopieren fehlgeschlagen',ok);
+    toast(ok?t('memoCopied')+(uiLanguage==='de'?' — jetzt Strg+V drücken':' — press Ctrl+V'):t('copyFailed'),ok);
   });
   if(canDrag){
     row.draggable=true;
@@ -488,7 +615,7 @@ function render(){
   const q=document.getElementById('search').value.trim().toLowerCase();
   const groups=groupsForQuery(q);
   if(!groups.source.length){
-    list.innerHTML=q?'<div class="empty">Keine Treffer.</div>':'<div class="empty">Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⤒ importieren.</div>';
+    list.innerHTML='<div class="empty">'+t(q?'searchEmpty':'snippetsEmpty')+'</div>';
     renderFloating(); return;
   }
 
@@ -525,7 +652,7 @@ function fitTextEditors(){
 function openEdit(idx){
   editIndex=idx;
   const it = idx>=0 ? ITEMS[idx] : {name:'',folder:'',text:'',memo:''};
-  document.getElementById('mTitle').textContent = idx>=0?'Textbaustein bearbeiten':'Neuer Textbaustein';
+  document.getElementById('mTitle').textContent = t(idx>=0?'editSnippetTitle':'newSnippetTitle');
   document.getElementById('mName').value=it.name||'';
   document.getElementById('mFolder').value=it.folder||'';
   document.getElementById('mText').value=it.text||'';
@@ -547,22 +674,33 @@ document.getElementById('mSave').addEventListener('click', ()=>{
   save(ITEMS); closeEdit(); render();
 });
 document.getElementById('mDelete').addEventListener('click', ()=>{
-  if(editIndex>=0 && confirm('Diesen Textbaustein wirklich löschen?')){ ITEMS.splice(editIndex,1); save(ITEMS); closeEdit(); render(); }
+  if(editIndex>=0 && confirm(t('deleteSnippetConfirm'))){ ITEMS.splice(editIndex,1); save(ITEMS); closeEdit(); render(); toast(t('snippetDeleted'),true); }
 });
 document.getElementById('mCancel').addEventListener('click', closeEdit);
 document.getElementById('ov').addEventListener('click', e=>{ if(e.target.id==='ov') closeEdit(); });
 document.getElementById('mText').addEventListener('input', fitTextEditors);
+document.getElementById('mText').addEventListener('paste',event=>{
+  const html=event.clipboardData&&event.clipboardData.getData('text/html');
+  if(!html) return;
+  const pasted=richPasteToMacroText(html);
+  if(!/\[[^\]]+\]\((?:https?:\/\/|mailto:|tel:)[^\s)]+\)/.test(pasted)) return;
+  const field=event.currentTarget;
+  const start=field.selectionStart==null?field.value.length:field.selectionStart;
+  const end=field.selectionEnd==null?start:field.selectionEnd;
+  field.setRangeText(pasted,start,end,'end');
+  event.preventDefault();
+  fitTextEditors();
+  toast(t('linkPasted'),true);
+});
 document.getElementById('mMemo').addEventListener('input', fitTextEditors);
 document.getElementById('mInsertLink').addEventListener('click',()=>{
   const labelField=document.getElementById('mLinkLabel');
   const urlField=document.getElementById('mLinkUrl');
   const label=labelField.value.trim().replace(/[\[\]]/g,'');
   const address=urlField.value.trim();
-  let parsed;
-  try{ parsed=new URL(address); }catch(e){}
-  if(!label){ labelField.focus(); toast('Bitte einen Linktext eintragen',false); return; }
-  if(!parsed||!['http:','https:','mailto:'].includes(parsed.protocol)){ urlField.focus(); toast('Bitte eine gültige http-, https- oder mailto-Adresse eintragen',false); return; }
-  const safeAddress=parsed.href.replace(/\)/g,'%29');
+  const safeAddress=safeLinkHref(address);
+  if(!label){ labelField.focus(); toast(t('linkLabelMissing'),false); return; }
+  if(!safeAddress){ urlField.focus(); toast(t('linkUrlInvalid'),false); return; }
   const snippet=`[${label}](${safeAddress})`;
   const field=document.getElementById('mText');
   const start=field.selectionStart==null?field.value.length:field.selectionStart;
@@ -572,34 +710,44 @@ document.getElementById('mInsertLink').addEventListener('click',()=>{
   fitTextEditors(); labelField.value=''; urlField.value='';
 });
 const targetLanguageSelect=document.getElementById('targetLanguage');
-targetLanguageSelect.value=targetLanguage;
 targetLanguageSelect.addEventListener('change',()=>setTargetLanguage(targetLanguageSelect.value));
+const sourceLanguageSelect=document.getElementById('sourceLanguage');
+sourceLanguageSelect.addEventListener('change',()=>setSourceLanguage(sourceLanguageSelect.value));
+document.getElementById('btnSettings').addEventListener('click',()=>{ applyLanguage(); document.getElementById('settingsOv').classList.add('show'); });
+document.getElementById('settingsClose').addEventListener('click',()=>document.getElementById('settingsOv').classList.remove('show'));
+document.getElementById('settingsOv').addEventListener('click',event=>{ if(event.target.id==='settingsOv') event.currentTarget.classList.remove('show'); });
 document.getElementById('translationClose').addEventListener('click',()=>document.getElementById('translationOv').classList.remove('show'));
 document.getElementById('translationOv').addEventListener('click',event=>{ if(event.target.id==='translationOv') event.currentTarget.classList.remove('show'); });
 document.getElementById('translationCopy').addEventListener('click',async()=>{
   const ok=await copyMacroText(document.getElementById('translationText').value);
-  if(ok){ document.getElementById('translationOv').classList.remove('show'); toast('Übersetzung kopiert – jetzt Strg+V drücken',true); }
-  else toast('Kopieren fehlgeschlagen – Text markieren und Strg+C drücken',false);
+  if(ok){ document.getElementById('translationOv').classList.remove('show'); toast(t('translationCopyDone'),true); }
+  else toast(t('copyFailedSelect'),false);
 });
 window.addEventListener('resize', ()=>{ if(document.getElementById('ov').classList.contains('show')) fitTextEditors(); });
 
 document.getElementById('btnNew').addEventListener('click', ()=>openEdit(-1));
-document.getElementById('btnEdit').addEventListener('click', function(){ editMode=!editMode; this.classList.toggle('on',editMode); toast(editMode?'Bearbeitungsmodus: Textbaustein anklicken':'Bearbeitungsmodus beendet', true); });
-document.getElementById('search').addEventListener('input', render);
+document.getElementById('btnEdit').addEventListener('click', function(){ editMode=!editMode; this.classList.toggle('on',editMode); toast(editMode?t('editStarted'):t('editStopped'), true); });
+const searchField=document.getElementById('search');
+const searchClearButton=document.getElementById('searchClear');
+function syncSearchClear(){ searchClearButton.hidden=searchField.value.length===0; }
+searchClearButton.title=t('clearSearch');
+searchClearButton.setAttribute('aria-label',t('clearSearch'));
+searchField.addEventListener('input',()=>{ syncSearchClear(); render(); });
+searchClearButton.addEventListener('click',()=>{ searchField.value=''; syncSearchClear(); render(); searchField.focus(); });
 
 /* Telefonbuch */
 let contactEditIndex=-1;
 function renderContacts(){
   const list=document.getElementById('contactsList'); list.innerHTML='';
-  if(!CONTACTS.length){ list.innerHTML='<div class="empty">Noch keine Kontakte.<br>Mit „＋ Kontakt“ den ersten Eintrag anlegen.</div>'; return; }
+  if(!CONTACTS.length){ list.innerHTML='<div class="empty">'+t('contactsEmpty')+'</div>'; return; }
   CONTACTS.forEach((contact,index)=>{
     const row=document.createElement('div'); row.className='contactRow';
     const name=document.createElement('div'); name.className='contactName'; name.textContent=contact.name||'—';
     const phone=document.createElement('button'); phone.className='contactPhone'; phone.type='button'; phone.textContent=contact.phone||'—'; phone.disabled=!contact.phone;
-    phone.title=contact.phone?'Telefonnummer kopieren':'';
-    phone.addEventListener('click',async ()=>{ const ok=await copyText(contact.phone); toast(ok?'Telefonnummer kopiert':'Kopieren fehlgeschlagen',ok); });
+    phone.title=contact.phone?t('phoneCopied'):'';
+    phone.addEventListener('click',async ()=>{ const ok=await copyText(contact.phone); toast(ok?t('phoneCopied'):t('copyFailed'),ok); });
     const company=document.createElement('div'); company.className='contactCompany'; company.textContent=contact.company||'—';
-    const edit=document.createElement('button'); edit.className='contactEdit'; edit.type='button'; edit.title='Kontakt bearbeiten'; edit.setAttribute('aria-label','Kontakt bearbeiten'); edit.textContent='✎';
+    const edit=document.createElement('button'); edit.className='contactEdit'; edit.type='button'; edit.title=t('editContact'); edit.setAttribute('aria-label',t('editContact')); edit.textContent='✎';
     edit.addEventListener('click',()=>openContactEdit(index));
     row.append(name,phone,company,edit); list.appendChild(row);
   });
@@ -609,7 +757,7 @@ function closeContacts(){ document.getElementById('contactsOv').classList.remove
 function openContactEdit(index){
   contactEditIndex=index;
   const contact=index>=0?CONTACTS[index]:{name:'',phone:'',company:''};
-  document.getElementById('contactEditTitle').textContent=index>=0?'Kontakt bearbeiten':'Neuer Kontakt';
+  document.getElementById('contactEditTitle').textContent=t(index>=0?'editContact':'newContactTitle');
   document.getElementById('contactName').value=contact.name||'';
   document.getElementById('contactPhone').value=contact.phone||'';
   document.getElementById('contactCompany').value=contact.company||'';
@@ -631,11 +779,11 @@ document.getElementById('contactSave').addEventListener('click',()=>{
   if(!phone){ document.getElementById('contactPhone').focus(); return; }
   const contact={name,phone,company:document.getElementById('contactCompany').value.trim()};
   if(contactEditIndex>=0) CONTACTS[contactEditIndex]=contact; else CONTACTS.push(contact);
-  saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast('Kontakt gespeichert',true);
+  saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast(t('contactSaved'),true);
 });
 document.getElementById('contactDelete').addEventListener('click',()=>{
-  if(contactEditIndex>=0 && confirm('Diesen Kontakt wirklich löschen?')){
-    CONTACTS.splice(contactEditIndex,1); saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast('Kontakt gelöscht',true);
+  if(contactEditIndex>=0 && confirm(t('deleteContactConfirm'))){
+    CONTACTS.splice(contactEditIndex,1); saveContacts(CONTACTS); closeContactEdit(); renderContacts(); toast(t('contactDeleted'),true);
   }
 });
 
@@ -658,17 +806,18 @@ document.getElementById('fileImport').addEventListener('change', e=>{
   const r=new FileReader(); r.onload=()=>{ try{
     const data=JSON.parse(r.result);
     if(Array.isArray(data)){
-      ITEMS=normalizeItems(data); save(ITEMS); render(); toast('Alte Snippet-Sicherung importiert',true);
+      ITEMS=normalizeItems(data); save(ITEMS); render(); toast(t('oldBackupImported'),true);
     }else if(data && Array.isArray(data.snippets) && (data.contacts===undefined || Array.isArray(data.contacts))){
       ITEMS=normalizeItems(data.snippets); save(ITEMS);
       if(Array.isArray(data.contacts)){ CONTACTS=data.contacts; saveContacts(CONTACTS); }
-      render(); renderContacts(); toast('Sicherung importiert',true);
-    }else toast('Ungültige Datei',false);
-  }catch(_){toast('Ungültige Datei',false);} };
+      render(); renderContacts(); toast(t('backupImported'),true);
+    }else toast(t('invalidFile'),false);
+  }catch(_){toast(t('invalidFile'),false);} };
   r.readAsText(f); e.target.value='';
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){
   if(document.getElementById('helpOv').classList.contains('show')) closeHelp();
+  else if(document.getElementById('settingsOv').classList.contains('show')) document.getElementById('settingsOv').classList.remove('show');
   else if(document.getElementById('contactEditOv').classList.contains('show')) closeContactEdit();
   else if(document.getElementById('contactsOv').classList.contains('show')) closeContacts();
   else closeEdit();
@@ -691,7 +840,7 @@ function setFloatingStatus(message,ok){
 function appendFloatingRow(doc, groupList, entry, q, stripeIndex){
   const it=entry.it;
   const row=doc.createElement('div'); row.className='floatRow'+(stripeIndex%2?' alt':'');
-  const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title='Makrotext kopieren';
+  const main=doc.createElement('button'); main.className='floatMain'; main.type='button'; main.title=t('helpCopyTitle');
   const accent=doc.createElement('span'); accent.className='floatAccent';
   const name=doc.createElement('span'); name.className='floatName'; name.innerHTML=highlight(it.name,q);
   main.append(accent,name);
@@ -699,10 +848,10 @@ function appendFloatingRow(doc, groupList, entry, q, stripeIndex){
     await copyOrTranslate(it.text,floatWindow);
   });
   const memo=doc.createElement('button'); memo.className='floatMemo'; memo.type='button'; memo.textContent='Memo';
-  memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?'Kein Memo hinterlegt':'Memo kopieren';
+  memo.disabled=!(it.memo||'').length; memo.title=memo.disabled?t('noMemo'):t('copyMemo');
   memo.addEventListener('click',async ()=>{
     const ok=await copyText(it.memo,floatWindow);
-    setFloatingStatus(ok?'Memo kopiert':'Kopieren fehlgeschlagen',ok);
+    setFloatingStatus(ok?t('memoCopied'):t('copyFailed'),ok);
   });
   row.append(main,memo); groupList.appendChild(row);
 }
@@ -717,7 +866,7 @@ function renderFloating(){
   const groups=groupsForQuery(q);
   list.innerHTML='';
   if(!groups.source.length){
-    const empty=doc.createElement('div'); empty.className='floatEmpty'; empty.textContent=q?'Keine Treffer.':'Noch keine Textbausteine.'; list.appendChild(empty); return;
+    const empty=doc.createElement('div'); empty.className='floatEmpty'; empty.textContent=t(q?'searchEmpty':'snippetsEmpty').replace(/<br>/g,' '); list.appendChild(empty); return;
   }
   let stripeIndex=0;
   groups.unfiled.forEach(entry=> appendFloatingRow(doc,list,entry,q,stripeIndex++));
@@ -740,20 +889,21 @@ function renderFloating(){
 async function openFloatingWindow(){
   if(floatWindow&&!floatWindow.closed){ floatWindow.focus(); return; }
   if(!('documentPictureInPicture' in window)){
-    toast('Schwebefenster wird von diesem Edge nicht unterstützt',false); return;
+    toast(t('floatUnsupported'),false); return;
   }
   try{
     const pip=await documentPictureInPicture.requestWindow({width:430,height:620});
     floatWindow=pip;
-    pip.document.title='Snippet-Makro';
+    pip.document.title=t('floatTitle');
     pip.document.head.innerHTML='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
     const style=pip.document.createElement('style');
     style.textContent=`
       :root{--bg:#0e1015;--panel:#1b1f27;--card:#262b36;--cardAlt:#1f3558;--cardh:#2f3542;--line:#313846;--text:#eef1f6;--sub:#98a2b3;--accent:#5aa2ff;--accent2:#7c5cff;--fold:#302b58;--foldt:#d8d0ff}
       *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:radial-gradient(600px 300px at 15% -10%,rgba(90,162,255,.12),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;overflow:hidden}
       .floatShell{height:100%;display:flex;flex-direction:column;padding:12px}.floatHead{display:flex;align-items:center;padding:1px 2px 10px}.floatHeadText{min-width:0;display:flex;flex-direction:column;gap:2px}.floatTitle{font-size:14px;font-weight:750}.floatHint{color:var(--sub);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 11px;font:13px inherit;outline:none;margin-bottom:7px}.floatSearch:focus{border-color:var(--accent)}
-      .floatLanguageBar{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:11.5px;margin-bottom:7px}.floatLanguageBar label{white-space:nowrap}.floatLanguage{flex:1;min-width:0;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:7px 9px;font:inherit;outline:none}
+      .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatSearchWrap{position:relative;margin-bottom:7px}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 36px 9px 11px;font:13px inherit;outline:none}.floatSearch:focus{border-color:var(--accent)}
+      .floatSearchClear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:23px;height:23px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--sub);font-size:18px;line-height:1;font-family:inherit;cursor:pointer}.floatSearchClear:hover{background:var(--card);color:var(--text)}.floatSearchClear[hidden]{display:none}
+      .floatLanguageBar{position:relative;margin-bottom:7px;color:var(--sub);font-size:11.5px}.floatLanguageBar::after{content:"";position:absolute;right:12px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(45deg);pointer-events:none}.floatLanguage{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:7px 34px 7px 9px;font:inherit;outline:none}
       .floatList{min-height:0;overflow-y:auto;padding:0 1px 7px}.floatList::-webkit-scrollbar{width:9px}.floatList::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--bg)}
       .floatGroup{margin:8px 4px 2px}.floatFolder{width:100%;display:flex;align-items:center;gap:8px;border:0;border-radius:10px;background:var(--fold);color:var(--foldt);padding:9px 12px;text-align:left;font:600 14px inherit;cursor:pointer}.floatFolder:hover{filter:brightness(1.08)}.floatFolderArrow{width:12px;font-size:12px}.floatGroupItems{padding-top:1px}.floatGroupItems[hidden]{display:none}.floatGroupItems .floatRow{margin-left:16px}
       .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:11px;overflow:hidden;margin:6px 4px}.floatRow:hover,.floatRow.alt:hover{background:var(--cardh)}.floatRow.alt{background:var(--cardAlt)}.floatRow.alt .floatAccent{background:linear-gradient(#4fe0ff,#5aa2ff)}button{font-family:inherit}
@@ -763,28 +913,33 @@ async function openFloatingWindow(){
       .floatCopyOverlay{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:12px}.floatCopyOverlay[hidden]{display:none}.floatCopyCard{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px;box-shadow:0 18px 40px rgba(0,0,0,.5)}.floatCopyCard h3{margin:0 0 8px;font-size:14px}.floatCopyCard textarea{width:100%;height:150px;resize:vertical;background:#12151b;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:12px/1.45 'Cascadia Mono',Consolas,monospace}.floatCopyActs{display:flex;gap:7px;margin-top:9px}.floatCopyActs button{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px;background:#20242e;color:var(--text);cursor:pointer}.floatCopyActs .floatCopyPrimary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:700}
     `;
     pip.document.head.appendChild(style);
-    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><div class="floatHeadText"><span class="floatTitle">Snippet-Makro</span><span class="floatHint">Makros, Memos und Ordner</span></div></div><section class="floatPanel" id="floatPanel"><input class="floatSearch" id="floatSearch" type="search" placeholder="Makros und Memos durchsuchen …" spellcheck="false"><div class="floatLanguageBar"><label for="floatLanguage">Übersetzen nach</label><select class="floatLanguage" id="floatLanguage"><option value="">Originaltext kopieren</option></select></div><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div><div class="floatCopyOverlay" id="floatCopyOverlay" hidden><div class="floatCopyCard"><h3>Übersetzung kopieren</h3><textarea id="floatCopyText" readonly spellcheck="false"></textarea><div class="floatCopyActs"><button class="floatCopyPrimary" id="floatCopyButton" type="button">Kopieren</button><button id="floatCopyClose" type="button">Schließen</button></div></div></div></main>';
+    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><div class="floatHeadText"><span class="floatTitle" id="floatTitle"></span><span class="floatHint" id="floatHint"></span></div></div><section class="floatPanel" id="floatPanel"><div class="floatSearchWrap"><input class="floatSearch" id="floatSearch" type="text" spellcheck="false"><button class="floatSearchClear" id="floatSearchClear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button></div><div class="floatLanguageBar"><select class="floatLanguage" id="floatLanguage"></select></div><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div><div class="floatCopyOverlay" id="floatCopyOverlay" hidden><div class="floatCopyCard"><h3 id="floatCopyTitle"></h3><textarea id="floatCopyText" readonly spellcheck="false"></textarea><div class="floatCopyActs"><button class="floatCopyPrimary" id="floatCopyButton" type="button"></button><button id="floatCopyClose" type="button"></button></div></div></div></main>';
     const floatingLanguage=pip.document.getElementById('floatLanguage');
-    LANGUAGES.forEach(([code,label])=>{ const option=pip.document.createElement('option'); option.value=code; option.textContent=label; floatingLanguage.appendChild(option); });
-    floatingLanguage.value=targetLanguage;
     floatingLanguage.addEventListener('change',()=>setTargetLanguage(floatingLanguage.value));
-    pip.document.getElementById('floatSearch').addEventListener('input',renderFloating);
+    applyFloatingLanguage();
+    const floatSearchField=pip.document.getElementById('floatSearch');
+    const floatSearchClear=pip.document.getElementById('floatSearchClear');
+    const syncFloatSearchClear=()=>{ floatSearchClear.hidden=floatSearchField.value.length===0; };
+    floatSearchClear.title=t('clearSearch');
+    floatSearchClear.setAttribute('aria-label',t('clearSearch'));
+    floatSearchField.addEventListener('input',()=>{ syncFloatSearchClear(); renderFloating(); });
+    floatSearchClear.addEventListener('click',()=>{ floatSearchField.value=''; syncFloatSearchClear(); renderFloating(); floatSearchField.focus(); });
     pip.document.getElementById('floatCopyButton').addEventListener('click',async()=>{
       const ok=await copyMacroText(pip.document.getElementById('floatCopyText').value,pip);
-      if(ok){ pip.document.getElementById('floatCopyOverlay').hidden=true; setFloatingStatus('Übersetzung kopiert',true); }
-      else setFloatingStatus('Kopieren fehlgeschlagen – Text markieren und Strg+C drücken',false);
+      if(ok){ pip.document.getElementById('floatCopyOverlay').hidden=true; setFloatingStatus(t('floatTranslationCopied'),true); }
+      else setFloatingStatus(t('copyFailedSelect'),false);
     });
     pip.document.getElementById('floatCopyClose').addEventListener('click',()=>{ pip.document.getElementById('floatCopyOverlay').hidden=true; });
     pip.addEventListener('pagehide',()=>{
       if(floatWindow===pip) floatWindow=null;
       floatButton.classList.remove('on');
-      floatButton.title='Schwebefenster öffnen';
+      floatButton.title=t('openFloat');
     },{once:true});
     floatButton.classList.add('on');
-    floatButton.title='Schwebefenster schließen';
+    floatButton.title=t('closeFloat');
     renderFloating();
   }catch(error){
-    if(error&&error.name!=='AbortError') toast('Schwebefenster konnte nicht geöffnet werden',false);
+    if(error&&error.name!=='AbortError') toast(t('floatOpenFailed'),false);
   }
 }
 
@@ -808,7 +963,7 @@ window.addEventListener('beforeinstallprompt', event=>{
 window.addEventListener('appinstalled', ()=>{
   installPrompt=null;
   installButton.style.display='none';
-  toast('App wurde installiert',true);
+  toast(t('appInstalled'),true);
 });
 installButton.addEventListener('click', async ()=>{
   if(installPrompt){
@@ -817,7 +972,7 @@ installButton.addEventListener('click', async ()=>{
     installPrompt=null;
     installButton.classList.remove('on');
   }else{
-    toast('In Edge: ⋯ → Apps → Diese Website als App installieren',true);
+    toast(t('installHint'),true);
   }
 });
 
@@ -830,6 +985,7 @@ if('serviceWorker' in navigator){
   });
 }
 
+applyLanguage();
 render();
 </script>
 </body></html>

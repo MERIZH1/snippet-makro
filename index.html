@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Snippet-Makro für Microsoft Edge herunterladen">
+<meta name="description" content="Download Snippet Makro for Microsoft Edge">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<title>Snippet-Makro herunterladen</title>
+<title>Download Snippet Makro</title>
 <meta name="theme-color" content="#0e1015">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./snippet-logo-192.png">
@@ -32,7 +32,7 @@
   <h1>Snippet-Makro</h1>
   <button id="installButton" type="button" disabled>
    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
-   <span>App herunterladen</span>
+   <span>Download app</span>
   </button>
  </main>
 <script>
@@ -44,7 +44,7 @@
    event.preventDefault();
    installPrompt=event;
    installButton.disabled=false;
-   installLabel.textContent='App herunterladen';
+   installLabel.textContent='Download app';
  });
 
  installButton.addEventListener('click',async ()=>{
@@ -57,7 +57,7 @@
 
  window.addEventListener('appinstalled',()=>{
    installButton.disabled=true;
-   installLabel.textContent='App installiert';
+   installLabel.textContent='App installed';
  });
 
  if('serviceWorker' in navigator){
