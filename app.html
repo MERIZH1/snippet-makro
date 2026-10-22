@@ -29,14 +29,15 @@
    display:flex;justify-content:center;padding:22px 14px;-webkit-font-smoothing:antialiased}
  .panel{width:100%;max-width:460px;background:linear-gradient(180deg,var(--panel),#161a21);
    border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 44px)}
- .head{display:flex;align-items:center;gap:3px;padding:14px 14px 10px}
- .appLogo{width:38px;height:38px;border-radius:11px;flex:none;box-shadow:0 5px 14px rgba(38,56,47,.3)}
- .title{font-size:14px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
- .tbtn{width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
+ .head{display:flex;align-items:center;gap:6px;padding:14px 14px 10px}
+ .appLogo{width:40px;height:40px;border-radius:12px;flex:none;box-shadow:0 5px 14px rgba(38,56,47,.3)}
+ .title{font-size:18px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
+ .tbtn{position:relative;flex:none;width:32px;height:32px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
  .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .tbtn:hover{background:var(--panel2);color:var(--text)}
  .tbtn.on{background:rgba(90,162,255,.16);color:#bcd9ff;border-color:rgba(90,162,255,.35)}
+ .tbtn.hasNotice::after{content:"";position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#ff5b62;box-shadow:0 0 0 2px var(--panel)}
  .search{position:relative;margin:0 14px 10px}
  .search input{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);
    padding:9px 38px 9px 12px;font-size:14px;outline:none}
@@ -44,7 +45,7 @@
  .searchClear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--sub);font-size:18px;line-height:1;font-family:inherit;cursor:pointer}
  .searchClear:hover{background:var(--panel2);color:var(--text)}
  .searchClear[hidden]{display:none}
- .languageBar{position:relative;display:flex;align-items:center;margin:0 14px 9px;color:var(--sub);font-size:12px}
+ .languageBar{position:relative;display:flex;align-items:center;margin:0 14px 9px;color:var(--sub);font-size:14px}
  .languageBar::after,.selectWrap::after{content:"";position:absolute;right:13px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(45deg);pointer-events:none}
  .languageBar select,.settingsSelect{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:8px 36px 8px 11px;font:inherit;outline:none}
  .languageBar select:focus{border-color:var(--accent)}
@@ -101,6 +102,10 @@
  .acts .grow{flex:1}
  .btn{padding:9px 15px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:13.5px;cursor:pointer;font-family:inherit}
  .btn:hover{background:#2a303c}
+ .btn.on{border-color:rgba(90,162,255,.55);box-shadow:0 0 0 2px rgba(90,162,255,.13)}
+ .settingsActions{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}
+ .settingsActions .btn{flex:1 1 150px;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+ .settingsHelpIcon{width:19px;height:19px;display:inline-grid;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:13px;font-weight:700;line-height:1}
  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:600}
  .btn.danger{color:#ff8f80}
  .phoneModal{max-width:min(96vw,760px)}
@@ -133,7 +138,7 @@
  .translationModal textarea{min-height:190px}
  @media(max-width:520px){.helpGrid{grid-template-columns:1fr}}
  @media(max-width:620px){
-   .head{gap:4px}.appLogo{width:32px;height:32px;border-radius:9px}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
+   .head{gap:4px}.appLogo{width:32px;height:32px;border-radius:9px}.title{min-width:0;font-size:16px}.tbtn{width:32px;height:32px}
    .rowMain{gap:7px;padding-left:10px}.memoBtn{min-width:60px}
    .linkTools{flex-wrap:wrap}.linkTools input{flex:1 1 40%}.linkTools .btn{flex:1 1 100%}
    .contactCols{display:none}
@@ -141,7 +146,7 @@
    .contactName,.contactPhone,.contactCompany{grid-column:1}
    .contactEdit{grid-column:2;grid-row:1/4}
  }
- @media(max-width:360px){.head{gap:2px}.appLogo{width:27px;height:27px;border-radius:8px}.title{font-size:13px}.tbtn{width:26px;height:26px}}
+ @media(max-width:360px){.head{gap:2px}.appLogo{width:27px;height:27px;border-radius:8px}.title{font-size:14px}.tbtn{width:26px;height:26px}}
  mark{background:rgba(90,162,255,.32);color:#eaf2ff;border-radius:3px;padding:0 1px;font-weight:600}
 </style></head>
 <body>
@@ -152,15 +157,15 @@
      <button class="tbtn" id="btnFloat" data-i18n-title="openFloat" data-i18n-aria="openFloat" title="Open floating window" aria-label="Open floating window">
        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="11" y="11" width="7" height="5" rx="1"/></svg>
      </button>
-     <button class="tbtn" id="btnHelp" data-i18n-title="help" data-i18n-aria="help" title="Help" aria-label="Help">?</button>
      <button class="tbtn" id="btnContacts" data-i18n-title="contacts" data-i18n-aria="contacts" title="Contacts" aria-label="Contacts">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
      </button>
      <button class="tbtn" id="btnNew" data-i18n-title="newSnippet" title="New snippet">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
      </button>
-     <button class="tbtn" id="btnEdit" data-i18n-title="editMode" title="Edit mode">✎</button>
-     <button class="tbtn" id="btnInstall" data-i18n-title="install" title="Install as an app">⇩</button>
+     <button class="tbtn" id="btnEdit" data-i18n-title="editMode" data-i18n-aria="editMode" title="Edit mode" aria-label="Edit mode">
+       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+     </button>
      <button class="tbtn" id="btnSettings" data-i18n-title="settings" data-i18n-aria="settings" title="Settings" aria-label="Settings">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.95l-.36-2.54a.5.5 0 0 0-.49-.42h-3.78a.5.5 0 0 0-.49.42L9.26 5.31a7.28 7.28 0 0 0-1.63.95l-2.39-.96a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.49 7.49 0 0 0-.06.94c0 .32.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.38 1.03.7 1.63.95l.36 2.54a.5.5 0 0 0 .49.42h3.78a.5.5 0 0 0 .49-.42l.36-2.54c.6-.25 1.13-.57 1.63-.95l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
      </button>
@@ -261,9 +266,13 @@
  <div class="ov" id="settingsOv">
    <div class="modal" style="max-width:min(96vw,560px)">
      <h3 data-i18n="settingsTitle">Settings</h3>
+     <div class="settingsActions">
+       <button class="btn" id="btnSettingsHelp" type="button"><span class="settingsHelpIcon" aria-hidden="true">?</span><span data-i18n="help">Help</span></button>
+       <button class="btn" id="btnInstall" data-i18n="install" type="button">Install as an app</button>
+     </div>
      <label for="sourceLanguage" data-i18n="sourceLanguage">Source language</label>
      <div class="selectWrap"><select id="sourceLanguage" class="settingsSelect"></select></div>
-     <p data-i18n="sourceHelp" style="color:var(--sub);font-size:12px;line-height:1.45;margin:7px 0 16px">Automatic detection is the default. If a snippet is too short to identify reliably, choose its source language here. Invalid translation codes are never copied.</p>
+     <p data-i18n="sourceHelp" style="color:var(--sub);font-size:12px;line-height:1.45;margin:7px 0 16px">Automatic detection is the default. If a snippet is too short to identify reliably, choose its source language here.</p>
      <label data-i18n="backup">Data backup</label>
      <div class="acts" style="margin-top:6px">
        <button class="btn" id="btnExport" data-i18n="export">Export backup (.json)</button>
@@ -279,6 +288,7 @@ const KEY = 'snippetMenu.items.v1';
 const CONTACT_KEY = 'snippetMenu.contacts.v1';
 const TRANSLATION_KEY = 'snippetMenu.translation.target.v1';
 const SOURCE_LANGUAGE_KEY = 'snippetMenu.translation.source.v1';
+const SETTINGS_NOTICE_KEY = 'snippetMenu.settingsNoticeSeen.v1';
 const LANGUAGES = [
   ['ar','Arabic'],['bg','Bulgarian'],['bn','Bengali'],['cs','Czech'],['da','Danish'],['de','German'],['el','Greek'],['en','English'],['es','Spanish'],['fi','Finnish'],['fr','French'],['he','Hebrew'],['hi','Hindi'],['hr','Croatian'],['hu','Hungarian'],['id','Indonesian'],['it','Italian'],['ja','Japanese'],['kn','Kannada'],['ko','Korean'],['lt','Lithuanian'],['mr','Marathi'],['nl','Dutch'],['no','Norwegian'],['pl','Polish'],['pt','Portuguese'],['ro','Romanian'],['ru','Russian'],['sk','Slovak'],['sl','Slovenian'],['sv','Swedish'],['ta','Tamil'],['te','Telugu'],['th','Thai'],['tr','Turkish'],['uk','Ukrainian'],['vi','Vietnamese'],['zh','Chinese'],['zh-Hant','Chinese (Traditional)']
 ];
@@ -287,6 +297,9 @@ const UI_TEXT={
   de:{appTitle:'Snippy',description:'Offline-Menü für Textbausteine, Memos und Kontakte',openFloat:'Schwebefenster öffnen',closeFloat:'Schwebefenster schließen',help:'Hilfe',contacts:'Telefonbuch',newSnippet:'Neuen Textbaustein anlegen',editMode:'Bearbeitungsmodus',install:'Als App installieren',settings:'Einstellungen',search:'Textbausteine durchsuchen …',target:'Übersetzen nach',targetTitle:'Zielsprache für Textbausteine; Memos werden nie übersetzt',original:'Originaltext kopieren',footer:'Textbaustein anklicken zum Kopieren. Zielsprache wählen, um zu übersetzen und zu kopieren. Memos bleiben unverändert.',copied:'✓ Kopiert — jetzt Strg+V drücken',name:'Name',folder:'Ordner (leer = kein Ordner)',text:'Text',linkText:'Linktext',linkAddress:'Link-Adresse',insertLink:'↗ Link einfügen',memoPlaceholder:'Zusätzlichen Memo-Text separat kopieren …',save:'Speichern',delete:'Löschen',cancel:'Abbrechen',translationTitle:'Übersetzung kopieren',translationBlocked:'Der Browser hat das automatische Kopieren blockiert. Die Übersetzung bleibt auf diesem Gerät.',copyTranslation:'Übersetzung kopieren',close:'Schließen',contactsTitle:'Telefonbuch',phoneClick:'Telefonnummer anklicken, um sie zu kopieren.',newContact:'＋ Kontakt',phoneHeader:'Telefonnummer',companyHeader:'Firma',editContact:'Kontakt bearbeiten',phone:'Telefonnummer',company:'Firma (optional)',helpTitle:'So funktioniert Snippy',helpSubtitle:'Die wichtigsten Funktionen auf einen Blick.',helpCopyTitle:'Textbaustein kopieren',helpCopyBody:'Linke Seite eines Eintrags anklicken. Der Text wird in die Zwischenablage kopiert.',helpMemoTitle:'Memo kopieren',helpMemoBody:'Rechts auf Memo klicken. Das Memo wird separat kopiert.',helpTranslateTitle:'Übersetzen',helpTranslateBody:'Zielsprache wählen und einen Textbaustein anklicken. Edge/Chrome übersetzt auf diesem Gerät. Das Sprachmodell muss eventuell einmalig heruntergeladen werden. Memos werden nie übersetzt. Bei unsicherer Erkennung die Ausgangssprache in den Einstellungen festlegen.',helpLinksTitle:'Hyperlinks',helpLinksBody:'Text aus einer E-Mail oder Webseite mit Strg+V einfügen: Verlinkte Wörter behalten ihren Link. Oder Linktext und Adresse eintragen und „Link einfügen“ anklicken.',helpAddTitle:'Textbausteine anlegen',helpAddBody:'Mit ＋ Namen, Ordner, Text und optionales Memo speichern.',helpFoldersTitle:'Ordner',helpFoldersBody:'Ordnerüberschrift anklicken, um sie auf- oder zuzuklappen. Einträge ohne Ordner stehen oben.',helpReorderTitle:'Sortieren',helpReorderBody:'Eintrag mit ⠿ verschieben oder in einen Ordner ziehen.',helpFloatTitle:'Schwebefenster',helpFloatBody:'Das Fenstersymbol öffnet die Kopieransicht über anderen Apps. Die Reihenfolge bleibt gleich.',helpContactsTitle:'Telefonbuch',helpContactsBody:'Telefonnummer anklicken, um sie zu kopieren. Kontakte lassen sich jederzeit bearbeiten.',helpBackupTitle:'Sicherungen',helpBackupBody:'Über ⚙ alle Daten exportieren oder eine JSON-Sicherung importieren.',settingsTitle:'Einstellungen',interfaceLanguage:'Menüsprache',sourceLanguage:'Ausgangssprache',autoDetect:'Automatisch erkennen',sourceHelp:'Automatische Erkennung ist voreingestellt. Wenn ein Text zu kurz zur sicheren Erkennung ist, hier die Ausgangssprache wählen. Ungültige Übersetzungscodes werden nie kopiert.',backup:'Datensicherung',export:'Sicherung exportieren (.json)',import:'Sicherung importieren (.json)',searchEmpty:'Keine Treffer.',snippetsEmpty:'Noch keine Textbausteine.<br>Mit ＋ anlegen oder über ⚙ eine Sicherung importieren.',contactsEmpty:'Noch keine Kontakte.<br>Mit ＋ Kontakt einen Eintrag anlegen.',newSnippetTitle:'Neuer Textbaustein',editSnippetTitle:'Textbaustein bearbeiten',newContactTitle:'Neuer Kontakt',deleteSnippetConfirm:'Diesen Textbaustein löschen?',deleteContactConfirm:'Diesen Kontakt löschen?',linkPasted:'Text eingefügt — Hyperlink übernommen',linkLabelMissing:'Bitte Linktext eintragen.',linkUrlInvalid:'Bitte eine gültige http-, https-, mailto- oder tel-Adresse eintragen.',translationCopyDone:'Übersetzung kopiert — jetzt Strg+V drücken',copyFailedSelect:'Kopieren fehlgeschlagen — Text markieren und Strg+C drücken',copyDone:'Kopiert — jetzt Strg+V drücken',copyFailed:'Kopieren fehlgeschlagen',snippetCopied:'Textbaustein kopiert',memoCopied:'Memo kopiert',noMemo:'Kein Memo hinterlegt',copyMemo:'Memo kopieren',phoneCopied:'Telefonnummer kopiert',contactSaved:'Kontakt gespeichert',contactDeleted:'Kontakt gelöscht',snippetDeleted:'Textbaustein gelöscht',editStarted:'Bearbeitungsmodus: Textbaustein anklicken',editStopped:'Bearbeitungsmodus beendet',invalidFile:'Ungültige Datei',oldBackupImported:'Alte Textbaustein-Sicherung importiert',backupImported:'Sicherung importiert',appInstalled:'App wurde installiert',floatUnsupported:'Dieses Edge unterstützt das Schwebefenster nicht.',floatOpenFailed:'Schwebefenster konnte nicht geöffnet werden.',floatTitle:'Snippy',floatHint:'Textbausteine, Memos und Ordner',floatSearch:'Textbausteine und Memos durchsuchen …',floatCopyTitle:'Übersetzung kopieren',floatCopy:'Kopieren',floatTranslationCopied:'Übersetzung kopiert',floatMoved:'Verschieben oder in einen Ordner ziehen',translateProgress:'Übersetzung wird erstellt …',translationPreparing:'Übersetzung wird vorbereitet …',languageUnavailable:'Diese Sprachkombination ist in Edge/Chrome nicht verfügbar.',translatorUnavailable:'Diese Edge-/Chrome-Version unterstützt die lokale Übersetzung nicht.',detectorUnavailable:'Ausgangssprache nicht erkannt. Bitte in den Einstellungen manuell auswählen. Es wurde nichts kopiert.',tooShort:'Der Text ist zu kurz, um die Ausgangssprache sicher zu erkennen. Bitte in den Einstellungen manuell auswählen. Es wurde nichts kopiert.',badTranslation:'Der Browser hat einen ungültigen TM-Platzhalter statt einer Übersetzung geliefert. Es wurde nichts kopiert. Bitte erneut versuchen oder die Ausgangssprache in den Einstellungen wählen.',emptyTranslation:'Der Browser hat keine Übersetzung zurückgegeben. Es wurde nichts kopiert.',downloadModel:'Sprachmodell wird geladen ({percent} %) …',translated:'Übersetzt und kopiert',translatedCopy:'Übersetzt — bitte hier kopieren',translationFailed:'Übersetzung fehlgeschlagen',installHint:'In Edge: ⋯ → Apps → Diese Website als App installieren',copyOriginalFloat:'Originaltext kopieren'}
 };
 const uiLanguage='en';
+UI_TEXT.en.sourceHelp='Automatic detection is the default. If a snippet is too short to identify reliably, choose its source language here.';
+UI_TEXT.de.sourceHelp='Automatische Erkennung ist voreingestellt. Wenn ein Text zu kurz zur sicheren Erkennung ist, hier die Ausgangssprache wählen.';
+try{ if(localStorage.getItem(SETTINGS_NOTICE_KEY)!=='1') document.getElementById('btnSettings').classList.add('hasNotice'); }catch(e){}
 UI_TEXT.en.appTitle='Snippy';
 UI_TEXT.en.floatTitle='Snippy';
 UI_TEXT.en.helpTitle='How Snippy works';
@@ -725,7 +738,16 @@ const targetLanguageSelect=document.getElementById('targetLanguage');
 targetLanguageSelect.addEventListener('change',()=>setTargetLanguage(targetLanguageSelect.value));
 const sourceLanguageSelect=document.getElementById('sourceLanguage');
 sourceLanguageSelect.addEventListener('change',()=>setSourceLanguage(sourceLanguageSelect.value));
-document.getElementById('btnSettings').addEventListener('click',()=>{ applyLanguage(); document.getElementById('settingsOv').classList.add('show'); });
+document.getElementById('btnSettings').addEventListener('click',()=>{
+  applyLanguage();
+  document.getElementById('btnSettings').classList.remove('hasNotice');
+  try{ localStorage.setItem(SETTINGS_NOTICE_KEY,'1'); }catch(e){}
+  document.getElementById('settingsOv').classList.add('show');
+});
+document.getElementById('btnSettingsHelp').addEventListener('click',()=>{
+  document.getElementById('settingsOv').classList.remove('show');
+  openHelp();
+});
 document.getElementById('settingsClose').addEventListener('click',()=>document.getElementById('settingsOv').classList.remove('show'));
 document.getElementById('settingsOv').addEventListener('click',event=>{ if(event.target.id==='settingsOv') event.currentTarget.classList.remove('show'); });
 document.getElementById('translationClose').addEventListener('click',()=>document.getElementById('translationOv').classList.remove('show'));
@@ -802,7 +824,6 @@ document.getElementById('contactDelete').addEventListener('click',()=>{
 /* Hilfe */
 function openHelp(){ document.getElementById('helpOv').classList.add('show'); }
 function closeHelp(){ document.getElementById('helpOv').classList.remove('show'); }
-document.getElementById('btnHelp').addEventListener('click',openHelp);
 document.getElementById('helpClose').addEventListener('click',closeHelp);
 document.getElementById('helpOv').addEventListener('click',e=>{ if(e.target.id==='helpOv') closeHelp(); });
 
