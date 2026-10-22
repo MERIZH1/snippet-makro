@@ -30,7 +30,7 @@
  .panel{width:100%;max-width:460px;background:linear-gradient(180deg,var(--panel),#161a21);
    border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 44px)}
  .head{display:flex;align-items:center;gap:3px;padding:14px 14px 10px}
- .appLogo{width:30px;height:30px;border-radius:9px;flex:none;box-shadow:0 5px 14px rgba(38,56,47,.3)}
+ .appLogo{width:38px;height:38px;border-radius:11px;flex:none;box-shadow:0 5px 14px rgba(38,56,47,.3)}
  .title{font-size:14px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
  .tbtn{width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sub);
    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -133,7 +133,7 @@
  .translationModal textarea{min-height:190px}
  @media(max-width:520px){.helpGrid{grid-template-columns:1fr}}
  @media(max-width:620px){
-   .head{gap:4px}.appLogo{width:25px;height:25px;border-radius:7px}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
+   .head{gap:4px}.appLogo{width:32px;height:32px;border-radius:9px}.title{min-width:0;font-size:14px}.tbtn{width:32px;height:32px}
    .rowMain{gap:7px;padding-left:10px}.memoBtn{min-width:60px}
    .linkTools{flex-wrap:wrap}.linkTools input{flex:1 1 40%}.linkTools .btn{flex:1 1 100%}
    .contactCols{display:none}
@@ -141,7 +141,7 @@
    .contactName,.contactPhone,.contactCompany{grid-column:1}
    .contactEdit{grid-column:2;grid-row:1/4}
  }
- @media(max-width:360px){.head{gap:2px}.appLogo{width:22px;height:22px;border-radius:6px}.title{font-size:13px}.tbtn{width:26px;height:26px}}
+ @media(max-width:360px){.head{gap:2px}.appLogo{width:27px;height:27px;border-radius:8px}.title{font-size:13px}.tbtn{width:26px;height:26px}}
  mark{background:rgba(90,162,255,.32);color:#eaf2ff;border-radius:3px;padding:0 1px;font-weight:600}
 </style></head>
 <body>
@@ -156,11 +156,13 @@
      <button class="tbtn" id="btnContacts" data-i18n-title="contacts" data-i18n-aria="contacts" title="Contacts" aria-label="Contacts">
        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 7H3M6 12H3M6 17H3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.8-2.2 6.2-2.2 7 0"/></svg>
      </button>
-     <button class="tbtn" id="btnNew" data-i18n-title="newSnippet" title="New snippet">＋</button>
+     <button class="tbtn" id="btnNew" data-i18n-title="newSnippet" title="New snippet">
+       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+     </button>
      <button class="tbtn" id="btnEdit" data-i18n-title="editMode" title="Edit mode">✎</button>
      <button class="tbtn" id="btnInstall" data-i18n-title="install" title="Install as an app">⇩</button>
      <button class="tbtn" id="btnSettings" data-i18n-title="settings" data-i18n-aria="settings" title="Settings" aria-label="Settings">
-       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1a1.8 1.8 0 1 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3 .9v.2a1.8 1.8 0 1 1-3.6 0v-.2a1.8 1.8 0 0 0-3-.9l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-.9-3h-.2a1.8 1.8 0 1 1 0-3.6h.2a1.8 1.8 0 0 0 .9-3l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3-.9v-.2a1.8 1.8 0 1 1 3.6 0v.2a1.8 1.8 0 0 0 3 .9l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 .9 3h.2a1.8 1.8 0 1 1 0 3.6h-.2a1.8 1.8 0 0 0-.9 3Z"/></svg>
+       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.95l-.36-2.54a.5.5 0 0 0-.49-.42h-3.78a.5.5 0 0 0-.49.42L9.26 5.31a7.28 7.28 0 0 0-1.63.95l-2.39-.96a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.49 7.49 0 0 0-.06.94c0 .32.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.38 1.03.7 1.63.95l.36 2.54a.5.5 0 0 0 .49.42h3.78a.5.5 0 0 0 .49-.42l.36-2.54c.6-.25 1.13-.57 1.63-.95l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
      </button>
    </div>
    <div class="search"><input id="search" data-i18n-placeholder="search" type="text" placeholder="Search snippets…" spellcheck="false"><button class="searchClear" id="searchClear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button></div>
