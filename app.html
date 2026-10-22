@@ -288,6 +288,9 @@ const KEY = 'snippetMenu.items.v1';
 const CONTACT_KEY = 'snippetMenu.contacts.v1';
 const TRANSLATION_KEY = 'snippetMenu.translation.target.v1';
 const SOURCE_LANGUAGE_KEY = 'snippetMenu.translation.source.v1';
+const RECENT_TARGET_LANGUAGES_KEY = 'snippetMenu.translation.recent.target.v1';
+const RECENT_SOURCE_LANGUAGES_KEY = 'snippetMenu.translation.recent.source.v1';
+const RECENT_LANGUAGE_LIMIT = 5;
 const SETTINGS_NOTICE_KEY = 'snippetMenu.settingsNoticeSeen.v1';
 const LANGUAGES = [
   ['ar','Arabic'],['bg','Bulgarian'],['bn','Bengali'],['cs','Czech'],['da','Danish'],['de','German'],['el','Greek'],['en','English'],['es','Spanish'],['fi','Finnish'],['fr','French'],['he','Hebrew'],['hi','Hindi'],['hr','Croatian'],['hu','Hungarian'],['id','Indonesian'],['it','Italian'],['ja','Japanese'],['kn','Kannada'],['ko','Korean'],['lt','Lithuanian'],['mr','Marathi'],['nl','Dutch'],['no','Norwegian'],['pl','Polish'],['pt','Portuguese'],['ro','Romanian'],['ru','Russian'],['sk','Slovak'],['sl','Slovenian'],['sv','Swedish'],['ta','Tamil'],['te','Telugu'],['th','Thai'],['tr','Turkish'],['uk','Ukrainian'],['vi','Vietnamese'],['zh','Chinese'],['zh-Hant','Chinese (Traditional)']
@@ -310,13 +313,53 @@ UI_TEXT.en.clearSearch='Clear search';
 UI_TEXT.en.targetTitle='Choose a target language to translate snippets; leave the first option selected to copy the original. Memos are never translated.';
 function t(key,values={}){ let value=(UI_TEXT[uiLanguage]&&UI_TEXT[uiLanguage][key])||UI_TEXT.en[key]||key; for(const [name,replacement] of Object.entries(values)) value=value.replace(`{${name}}`,String(replacement)); return value; }
 function languageName(code){ return (LANGUAGES.find(([languageCode])=>languageCode===code)||[code,code])[1]; }
-function fillLanguageSelect(select,includeAuto=false,includeOriginal=false){
+function getRecentLanguages(key){
+  try{
+    const saved=JSON.parse(localStorage.getItem(key)||'[]');
+    if(!Array.isArray(saved)) return [];
+    return [...new Set(saved.filter(code=>LANGUAGES.some(([languageCode])=>languageCode===code)))].slice(0,RECENT_LANGUAGE_LIMIT);
+  }catch(e){ return []; }
+}
+function rememberRecentLanguage(key,code){
+  if(!LANGUAGES.some(([languageCode])=>languageCode===code)) return;
+  const recent=[code,...getRecentLanguages(key).filter(saved=>saved!==code)].slice(0,RECENT_LANGUAGE_LIMIT);
+  try{ localStorage.setItem(key,JSON.stringify(recent)); }catch(e){}
+}
+function fillLanguageSelect(select,includeAuto=false,includeOriginal=false,recentKey=includeAuto?RECENT_SOURCE_LANGUAGES_KEY:RECENT_TARGET_LANGUAGES_KEY){
   if(!select) return;
+  const doc=select.ownerDocument||document;
   const selected=select.value; select.replaceChildren();
-  if(includeAuto){ const option=document.createElement('option'); option.value='auto'; option.textContent=t('autoDetect'); select.appendChild(option); }
-  if(includeOriginal){ const option=document.createElement('option'); option.value=''; option.textContent=t('target')+'…'; select.appendChild(option); }
-  LANGUAGES.forEach(([code])=>{ const option=document.createElement('option'); option.value=code; option.textContent=languageName(code); select.appendChild(option); });
+  if(includeAuto){ const option=doc.createElement('option'); option.value='auto'; option.textContent=t('autoDetect'); select.appendChild(option); }
+  if(includeOriginal){ const option=doc.createElement('option'); option.value=''; option.textContent=t('target')+'…'; select.appendChild(option); }
+  const recentCodes=getRecentLanguages(recentKey);
+  const recent=recentCodes.map(code=>LANGUAGES.find(([languageCode])=>languageCode===code)).filter(Boolean);
+  const recentSet=new Set(recentCodes);
+  const alphabetical=LANGUAGES.filter(([code])=>!recentSet.has(code)).slice().sort((a,b)=>a[1].localeCompare(b[1],'en',{sensitivity:'base'}));
+  const appendLanguage=([code])=>{ const option=doc.createElement('option'); option.value=code; option.textContent=languageName(code); select.appendChild(option); };
+  recent.forEach(appendLanguage);
+  if(recent.length&&alphabetical.length){ const divider=doc.createElement('option'); divider.disabled=true; divider.value='__language_divider__'; divider.textContent='────────────────'; divider.setAttribute('aria-hidden','true'); select.appendChild(divider); }
+  alphabetical.forEach(appendLanguage);
   if(Array.from(select.options).some(option=>option.value===selected)) select.value=selected;
+}
+const languageTypeaheadAttached=new WeakSet();
+function attachLanguageTypeahead(select,onSelect){
+  if(!select||languageTypeaheadAttached.has(select)) return;
+  languageTypeaheadAttached.add(select);
+  let typed='',lastTypedAt=0;
+  select.addEventListener('keydown',event=>{
+    if(event.ctrlKey||event.altKey||event.metaKey||!/^[a-z]$/i.test(event.key)) return;
+    const now=Date.now();
+    typed=now-lastTypedAt>900?event.key.toLocaleLowerCase('en'):typed+event.key.toLocaleLowerCase('en');
+    lastTypedAt=now;
+    const options=Array.from(select.options).filter(option=>!option.disabled&&LANGUAGES.some(([code])=>code===option.value));
+    let match=options.find(option=>option.textContent.trim().toLocaleLowerCase('en').startsWith(typed));
+    if(!match&&typed.length>1){ typed=event.key.toLocaleLowerCase('en'); match=options.find(option=>option.textContent.trim().toLocaleLowerCase('en').startsWith(typed)); }
+    if(!match) return;
+    event.preventDefault();
+    select.value=match.value;
+    onSelect(match.value,false,false);
+  });
+  select.addEventListener('blur',()=>onSelect(select.value,true,true));
 }
 function applyLanguage(){
   document.documentElement.lang=uiLanguage;
@@ -326,8 +369,8 @@ function applyLanguage(){
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title=t(el.dataset.i18nTitle); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPlaceholder); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>{ el.setAttribute('aria-label',t(el.dataset.i18nAria)); });
-  const target=document.getElementById('targetLanguage'); fillLanguageSelect(target,false,true); if(target) target.value=targetLanguage;
-  const source=document.getElementById('sourceLanguage'); fillLanguageSelect(source,true,false);
+  const target=document.getElementById('targetLanguage'); fillLanguageSelect(target,false,true,RECENT_TARGET_LANGUAGES_KEY); if(target) target.value=targetLanguage;
+  const source=document.getElementById('sourceLanguage'); fillLanguageSelect(source,true,false,RECENT_SOURCE_LANGUAGES_KEY);
   if(source) source.value=sourceLanguagePreference;
   if(floatWindow&&!floatWindow.closed) applyFloatingLanguage();
 }
@@ -341,10 +384,9 @@ function applyFloatingLanguage(){
   const clear=doc.getElementById('floatSearchClear'); if(clear){ clear.title=t('clearSearch'); clear.setAttribute('aria-label',t('clearSearch')); }
   const select=doc.getElementById('floatLanguage');
   if(select){
-    const selected=targetLanguage; select.replaceChildren();
-    const original=doc.createElement('option'); original.value=''; original.textContent=t('target')+'…'; select.appendChild(original);
-    LANGUAGES.forEach(([code])=>{ const option=doc.createElement('option'); option.value=code; option.textContent=languageName(code); select.appendChild(option); });
-    select.value=selected;
+    fillLanguageSelect(select,false,true,RECENT_TARGET_LANGUAGES_KEY);
+    attachLanguageTypeahead(select,setTargetLanguage);
+    select.value=targetLanguage;
     select.setAttribute('aria-label',t('target'));
     select.title=t('targetTitle');
   }
@@ -356,6 +398,8 @@ let targetLanguage = '';
 let sourceLanguagePreference = 'auto';
 try{ const savedLanguage=localStorage.getItem(TRANSLATION_KEY)||''; if(LANGUAGES.some(([code])=>code===savedLanguage)) targetLanguage=savedLanguage; }catch(e){}
 try{ const savedSource=localStorage.getItem(SOURCE_LANGUAGE_KEY)||'auto'; if(savedSource==='auto'||LANGUAGES.some(([code])=>code===savedSource)) sourceLanguagePreference=savedSource; }catch(e){}
+if(targetLanguage&&!getRecentLanguages(RECENT_TARGET_LANGUAGES_KEY).length) rememberRecentLanguage(RECENT_TARGET_LANGUAGES_KEY,targetLanguage);
+if(sourceLanguagePreference!=='auto'&&!getRecentLanguages(RECENT_SOURCE_LANGUAGES_KEY).length) rememberRecentLanguage(RECENT_SOURCE_LANGUAGES_KEY,sourceLanguagePreference);
 
 const DEFAULTS = [];
 
@@ -550,18 +594,20 @@ async function copyOrTranslate(text,targetWindow=window){
   }catch(error){ report(error&&error.message?error.message:t('translationFailed'),false); }
 }
 
-function setTargetLanguage(language){
+function setTargetLanguage(language,remember=true,rebuild=true){
   targetLanguage=LANGUAGES.some(([code])=>code===language)?language:'';
   try{ if(targetLanguage) localStorage.setItem(TRANSLATION_KEY,targetLanguage); else localStorage.removeItem(TRANSLATION_KEY); }catch(e){}
+  if(remember&&targetLanguage) rememberRecentLanguage(RECENT_TARGET_LANGUAGES_KEY,targetLanguage);
   const select=document.getElementById('targetLanguage');
-  if(select&&select.value!==targetLanguage) select.value=targetLanguage;
-  if(floatWindow&&!floatWindow.closed){ const floatingSelect=floatWindow.document.getElementById('floatLanguage'); if(floatingSelect) floatingSelect.value=targetLanguage; }
+  if(select){ if(rebuild) fillLanguageSelect(select,false,true,RECENT_TARGET_LANGUAGES_KEY); select.value=targetLanguage; }
+  if(floatWindow&&!floatWindow.closed){ const floatingSelect=floatWindow.document.getElementById('floatLanguage'); if(floatingSelect){ if(rebuild) fillLanguageSelect(floatingSelect,false,true,RECENT_TARGET_LANGUAGES_KEY); floatingSelect.value=targetLanguage; } }
 }
-function setSourceLanguage(language){
+function setSourceLanguage(language,remember=true,rebuild=true){
   sourceLanguagePreference=language==='auto'||LANGUAGES.some(([code])=>code===language)?language:'auto';
   try{ localStorage.setItem(SOURCE_LANGUAGE_KEY,sourceLanguagePreference); }catch(e){}
+  if(remember&&sourceLanguagePreference!=='auto') rememberRecentLanguage(RECENT_SOURCE_LANGUAGES_KEY,sourceLanguagePreference);
   const select=document.getElementById('sourceLanguage');
-  if(select&&select.value!==sourceLanguagePreference) select.value=sourceLanguagePreference;
+  if(select){ if(rebuild) fillLanguageSelect(select,true,false,RECENT_SOURCE_LANGUAGES_KEY); select.value=sourceLanguagePreference; }
 }
 let toastT;
 function toast(msg, ok){
@@ -736,8 +782,10 @@ document.getElementById('mInsertLink').addEventListener('click',()=>{
 });
 const targetLanguageSelect=document.getElementById('targetLanguage');
 targetLanguageSelect.addEventListener('change',()=>setTargetLanguage(targetLanguageSelect.value));
+attachLanguageTypeahead(targetLanguageSelect,setTargetLanguage);
 const sourceLanguageSelect=document.getElementById('sourceLanguage');
 sourceLanguageSelect.addEventListener('change',()=>setSourceLanguage(sourceLanguageSelect.value));
+attachLanguageTypeahead(sourceLanguageSelect,setSourceLanguage);
 document.getElementById('btnSettings').addEventListener('click',()=>{
   applyLanguage();
   document.getElementById('btnSettings').classList.remove('hasNotice');
