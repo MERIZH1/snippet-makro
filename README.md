@@ -1,7 +1,7 @@
 # Snippet-Makro
 
-Installierbare Offline-Web-App für persönliche Textbausteine, kopierbare Memos und ein lokales Telefonbuch. In unterstützten Edge-Versionen kann eine kompakte Kopieransicht mit Ordnern als dauerhaft sichtbares Schwebefenster geöffnet werden.
+Installierbare Offline-Web-App für persönliche Textbausteine, kopierbare Memos und ein lokales Telefonbuch. In unterstützten Edge-Versionen kann eine kompakte Kopieransicht mit Ordnern als dauerhaft sichtbares Schwebefenster geöffnet werden. Makros lassen sich außerdem mit der kostenlosen, integrierten Übersetzungsfunktion von Edge und Chrome direkt auf dem Gerät übersetzen.
 
 Die öffentliche Startseite dient nur zur Installation. Die eigentliche Oberfläche wird im normalen Browser nicht geöffnet.
 
-Die veröffentlichte App enthält keine Textbausteine, Kontakte, Serveradressen oder Zugangsdaten. Persönliche Inhalte werden ausschließlich im lokalen Browserspeicher des jeweiligen Geräts abgelegt. Die App sendet keine Nutzerdaten an externe Dienste.
+Die veröffentlichte App enthält keine Textbausteine, Kontakte, Serveradressen oder Zugangsdaten. Persönliche Inhalte werden ausschließlich im lokalen Browserspeicher des jeweiligen Geräts abgelegt. Bei der Übersetzung wird der Makrotext lokal im Browser verarbeitet und nicht an einen Übersetzungsdienst gesendet. Edge/Chrome müssen das Sprachmodell für die gewählte Sprache zunächst einmalig herunterladen; danach funktioniert die Übersetzung ohne Internetverbindung. Memos werden nie übersetzt. Eingefügte Hyperlinks werden beim Kopieren als klickbare Links übertragen, sofern das Zielprogramm HTML-Zwischenablage unterstützt.
