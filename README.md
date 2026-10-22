@@ -1,4 +1,4 @@
-# Snippet-Makro
+# Snippy
 
 Installierbare Offline-Web-App für persönliche Textbausteine, kopierbare Memos und ein lokales Telefonbuch. Die Oberfläche startet auf Englisch und kann bei Bedarf mit der integrierten Seitenübersetzung von Edge übersetzt werden. In unterstützten Edge-Versionen kann eine kompakte Kopieransicht mit Ordnern als dauerhaft sichtbares Schwebefenster geöffnet werden. Makros lassen sich außerdem mit der integrierten Übersetzungsfunktion von Edge und Chrome direkt auf dem Gerät übersetzen.
 

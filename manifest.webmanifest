@@ -1,7 +1,7 @@
 {
-  "name": "Snippet Makro",
-  "short_name": "Snippets",
-  "description": "Offline menu for snippets, memos, and contacts",
+  "name": "Snippy",
+  "short_name": "Snippy",
+  "description": "An offline menu for snippets, memos, and contacts",
   "id": "./",
   "start_url": "./app.html",
   "scope": "./",
