@@ -310,7 +310,12 @@ UI_TEXT.de.appTitle='Snippy';
 UI_TEXT.de.floatTitle='Snippy';
 UI_TEXT.de.helpTitle='So funktioniert Snippy';
 UI_TEXT.en.clearSearch='Clear search';
-UI_TEXT.en.targetTitle='Choose a target language to translate snippets; leave the first option selected to copy the original. Memos are never translated.';
+UI_TEXT.en.targetTitle='Choose a target language to translate snippets, or select “No translation” to copy the original. Memos are never translated.';
+UI_TEXT.en.noTranslation='No translation';
+UI_TEXT.de.noTranslation='Keine Übersetzung';
+UI_TEXT.en.alreadyTargetLanguage='This snippet appears to already be in {language}. If that is wrong, choose its source language in Settings. Nothing was copied.';
+UI_TEXT.de.alreadyTargetLanguage='Dieser Textbaustein scheint bereits auf {language} zu sein. Wenn das nicht stimmt, wähle die Ausgangssprache in den Einstellungen. Es wurde nichts kopiert.';
+UI_TEXT.de.targetTitle='Zielsprache zum Übersetzen wählen oder „Keine Übersetzung“ auswählen, um den Originaltext zu kopieren. Memos werden nie übersetzt.';
 function t(key,values={}){ let value=(UI_TEXT[uiLanguage]&&UI_TEXT[uiLanguage][key])||UI_TEXT.en[key]||key; for(const [name,replacement] of Object.entries(values)) value=value.replace(`{${name}}`,String(replacement)); return value; }
 function languageName(code){ return (LANGUAGES.find(([languageCode])=>languageCode===code)||[code,code])[1]; }
 function getRecentLanguages(key){
@@ -330,7 +335,7 @@ function fillLanguageSelect(select,includeAuto=false,includeOriginal=false,recen
   const doc=select.ownerDocument||document;
   const selected=select.value; select.replaceChildren();
   if(includeAuto){ const option=doc.createElement('option'); option.value='auto'; option.textContent=t('autoDetect'); select.appendChild(option); }
-  if(includeOriginal){ const option=doc.createElement('option'); option.value=''; option.textContent=t('target')+'…'; select.appendChild(option); }
+  if(includeOriginal){ const option=doc.createElement('option'); option.value=''; option.textContent=t('noTranslation'); select.appendChild(option); }
   const recentCodes=getRecentLanguages(recentKey);
   const recent=recentCodes.map(code=>LANGUAGES.find(([languageCode])=>languageCode===code)).filter(Boolean);
   const recentSet=new Set(recentCodes);
@@ -528,7 +533,7 @@ async function translateMacroText(text,language,onProgress=()=>{},targetWindow=w
       throw new Error(t('detectorUnavailable'));
     }finally{ if(detector&&detector.destroy) detector.destroy(); }
   }
-  if(sourceLanguage===language) return text;
+  if(sourceLanguage===language) throw new Error(t('alreadyTargetLanguage',{language:languageName(language)}));
   const availability=await TranslatorApi.availability({sourceLanguage,targetLanguage:language});
   if(availability==='unavailable') throw new Error(t('languageUnavailable'));
   onProgress(t('translationPreparing'));
