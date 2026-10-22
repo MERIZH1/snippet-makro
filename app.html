@@ -508,6 +508,25 @@ async function copyMacroText(text,targetWindow=window){
   return copyText(plain,targetWindow);
 }
 
+function beginTranslatedClipboardWrite(text,language,onProgress=()=>{},targetWindow=window){
+  const targetNavigator=targetWindow.navigator||navigator;
+  const ClipboardItemClass=targetWindow.ClipboardItem||window.ClipboardItem;
+  const BlobClass=targetWindow.Blob||window.Blob;
+  if(!targetNavigator.clipboard||!targetNavigator.clipboard.write||!ClipboardItemClass||!BlobClass) return null;
+  let resolveTranslation,rejectTranslation;
+  const translationData=new Promise((resolve,reject)=>{ resolveTranslation=resolve; rejectTranslation=reject; });
+  const plainData=translationData.then(translated=>new BlobClass([macroPlainText(translated)],{type:'text/plain'}));
+  const htmlData=translationData.then(translated=>new BlobClass([`<meta charset="utf-8"><div>${macroHtml(translated)}</div>`],{type:'text/html'}));
+  plainData.catch(()=>{}); htmlData.catch(()=>{});
+  try{
+    const item=new ClipboardItemClass({'text/plain':plainData,'text/html':htmlData});
+    const writePromise=targetNavigator.clipboard.write([item]);
+    const translationPromise=translateMacroText(text,language,onProgress,targetWindow);
+    translationPromise.then(resolveTranslation,rejectTranslation);
+    return {translationPromise,writePromise};
+  }catch(error){ rejectTranslation(error); return null; }
+}
+
 async function translateMacroText(text,language,onProgress=()=>{},targetWindow=window){
   const TranslatorApi=targetWindow.Translator||window.Translator;
   if(!TranslatorApi) throw new Error(t('translatorUnavailable'));
@@ -592,10 +611,18 @@ async function copyOrTranslate(text,targetWindow=window){
   }
   try{
     report(t('translateProgress'),true);
+    const pending=beginTranslatedClipboardWrite(text,targetLanguage,message=>report(message,true),targetWindow);
+    if(pending){
+      const writeResult=pending.writePromise.then(()=>({ok:true}),()=>({ok:false}));
+      const [,copied]=await Promise.all([pending.translationPromise,writeResult]);
+      if(!copied.ok) throw new Error(t('copyFailed'));
+      report(t('translated'),true);
+      return;
+    }
     const translated=await translateMacroText(text,targetLanguage,message=>report(message,true),targetWindow);
     const ok=await copyMacroText(translated,targetWindow);
     if(ok) report(t('translated'),true);
-    else{ showTranslationFallback(translated,targetWindow); report(t('translatedCopy'),false); }
+    else report(t('copyFailed'),false);
   }catch(error){ report(error&&error.message?error.message:t('translationFailed'),false); }
 }
 
