@@ -109,7 +109,9 @@
  .updateHeading{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
  .updateDot{width:8px;height:8px;border-radius:50%;background:#ff5b62;box-shadow:0 0 0 3px rgba(255,91,98,.13);flex:none}
  .updateAvailableText{margin-top:8px;font-size:14px;font-weight:700}
+ .updateVersion{margin-top:3px;color:var(--sub);font-size:12px;font-weight:600}
  .updateInstructions{margin:4px 0 10px;color:var(--sub);font-size:12px;line-height:1.45}
+ .appVersionLine{display:flex;justify-content:flex-end;gap:5px;border-top:1px solid var(--line);margin-top:15px;padding-top:10px;color:var(--sub);font-size:11px}
  .settingsHelpIcon{width:19px;height:19px;display:inline-grid;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:13px;font-weight:700;line-height:1}
  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:600}
  .btn.danger{color:#ff8f80}
@@ -278,6 +280,7 @@
       <div class="updateNotice" id="updateNotice" hidden>
         <div class="updateHeading"><span data-i18n="updates">Updates</span><span class="updateDot" aria-hidden="true"></span></div>
         <div class="updateAvailableText" data-i18n="updateAvailable">Update available!</div>
+        <div class="updateVersion" id="updateVersion"></div>
         <p class="updateInstructions" data-i18n="updateInstructions">A new version is ready. Select Update now to reload Snippy. Your saved data will remain on this device.</p>
         <button class="btn primary" id="updateNow" type="button" data-i18n="updateNow">Update now</button>
       </div>
@@ -291,6 +294,7 @@
        <input id="fileImport" type="file" accept="application/json,.json" style="display:none">
      </div>
      <div class="acts"><div class="grow"></div><button class="btn" id="settingsClose" data-i18n="close">Close</button></div>
+     <div class="appVersionLine"><span data-i18n="appVersion">Version</span><span id="installedVersion">v24 · 23.10.2026 11:57</span></div>
    </div>
  </div>
 
@@ -304,7 +308,8 @@ const RECENT_SOURCE_LANGUAGES_KEY = 'snippetMenu.translation.recent.source.v1';
 const RECENT_LANGUAGE_LIMIT = 5;
 const SETTINGS_NOTICE_KEY = 'snippetMenu.settingsNoticeSeen.v1';
 // Muss mit CACHE_NAME in sw.js synchron bleiben.
-const APP_VERSION = 'snippet-makro-v23';
+const APP_VERSION = 'snippet-makro-v24';
+const APP_RELEASE_AT = '23.10.2026 11:57';
 const LANGUAGES = [
   ['ar','Arabic'],['bg','Bulgarian'],['bn','Bengali'],['cs','Czech'],['da','Danish'],['de','German'],['el','Greek'],['en','English'],['es','Spanish'],['fi','Finnish'],['fr','French'],['he','Hebrew'],['hi','Hindi'],['hr','Croatian'],['hu','Hungarian'],['id','Indonesian'],['it','Italian'],['ja','Japanese'],['kn','Kannada'],['ko','Korean'],['lt','Lithuanian'],['mr','Marathi'],['nl','Dutch'],['no','Norwegian'],['pl','Polish'],['pt','Portuguese'],['ro','Romanian'],['ru','Russian'],['sk','Slovak'],['sl','Slovenian'],['sv','Swedish'],['ta','Tamil'],['te','Telugu'],['th','Thai'],['tr','Turkish'],['uk','Ukrainian'],['vi','Vietnamese'],['zh','Chinese'],['zh-Hant','Chinese (Traditional)']
 ];
@@ -325,6 +330,8 @@ UI_TEXT.de.helpTitle='So funktioniert Snippy';
 UI_TEXT.en.clearSearch='Clear search';
 UI_TEXT.en.updates='Updates';
 UI_TEXT.de.updates='Aktualisierungen';
+UI_TEXT.en.appVersion='Version';
+UI_TEXT.de.appVersion='Version';
 UI_TEXT.en.updateAvailable='Update available!';
 UI_TEXT.de.updateAvailable='Update verfügbar!';
 UI_TEXT.en.updateInstructions='A new version is ready. Select Update now to reload Snippy. Your saved data will remain on this device.';
@@ -1115,6 +1122,11 @@ function showUpdateAvailable(){
   document.getElementById('btnSettings').classList.add('hasUpdate');
   document.getElementById('updateNotice').hidden=false;
 }
+function formatAppVersion(version,releasedAt){
+  const shortVersion=String(version||'').replace(/^snippet-makro-/,'v');
+  return [shortVersion,releasedAt].filter(Boolean).join(' · ');
+}
+document.getElementById('installedVersion').textContent=formatAppVersion(APP_VERSION,APP_RELEASE_AT);
 function checkWorkerVersion(worker){
   if(!worker||typeof MessageChannel==='undefined') return Promise.resolve(false);
   return new Promise(resolve=>{
@@ -1122,8 +1134,12 @@ function checkWorkerVersion(worker){
     const timeout=setTimeout(()=>{ channel.port1.close(); resolve(false); },1500);
     channel.port1.onmessage=event=>{
       clearTimeout(timeout); channel.port1.close();
-      const available=!!(event.data&&event.data.version&&event.data.version!==APP_VERSION);
-      if(available) showUpdateAvailable();
+      const release=event.data||{};
+      const available=!!(release.version&&release.version!==APP_VERSION);
+      if(available){
+        document.getElementById('updateVersion').textContent=formatAppVersion(release.version,release.releasedAt);
+        showUpdateAvailable();
+      }
       resolve(available);
     };
     try{ worker.postMessage({type:'GET_VERSION'},[channel.port2]); }
