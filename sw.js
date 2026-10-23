@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snippet-makro-v21';
+const CACHE_NAME = 'snippet-makro-v22';
 const APP_SHELL = [
   './',
   './index.html',
@@ -26,6 +26,12 @@ self.addEventListener('activate', event => {
       ))
       .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'GET_VERSION' && event.ports?.[0]) {
+    event.ports[0].postMessage({ version: CACHE_NAME });
+  }
 });
 
 self.addEventListener('fetch', event => {

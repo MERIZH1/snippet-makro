@@ -37,7 +37,7 @@
  .tbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .tbtn:hover{background:var(--panel2);color:var(--text)}
  .tbtn.on{background:rgba(90,162,255,.16);color:#bcd9ff;border-color:rgba(90,162,255,.35)}
- .tbtn.hasNotice::after{content:"";position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#ff5b62;box-shadow:0 0 0 2px var(--panel)}
+ .tbtn.hasNotice::after,.tbtn.hasUpdate::after{content:"";position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#ff5b62;box-shadow:0 0 0 2px var(--panel)}
  .search{position:relative;margin:0 14px 10px}
  .search input{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);
    padding:9px 38px 9px 12px;font-size:14px;outline:none}
@@ -105,6 +105,11 @@
  .btn.on{border-color:rgba(90,162,255,.55);box-shadow:0 0 0 2px rgba(90,162,255,.13)}
  .settingsActions{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}
  .settingsActions .btn{flex:1 1 150px;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+ .updateNotice{border:1px solid rgba(255,91,98,.42);border-radius:10px;background:rgba(255,91,98,.07);padding:11px 12px;margin:0 0 15px}
+ .updateHeading{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+ .updateDot{width:8px;height:8px;border-radius:50%;background:#ff5b62;box-shadow:0 0 0 3px rgba(255,91,98,.13);flex:none}
+ .updateAvailableText{margin-top:8px;font-size:14px;font-weight:700}
+ .updateInstructions{margin:4px 0 10px;color:var(--sub);font-size:12px;line-height:1.45}
  .settingsHelpIcon{width:19px;height:19px;display:inline-grid;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:13px;font-weight:700;line-height:1}
  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:600}
  .btn.danger{color:#ff8f80}
@@ -270,6 +275,12 @@
        <button class="btn" id="btnSettingsHelp" type="button"><span class="settingsHelpIcon" aria-hidden="true">?</span><span data-i18n="help">Help</span></button>
        <button class="btn" id="btnInstall" data-i18n="install" type="button">Install as an app</button>
      </div>
+      <div class="updateNotice" id="updateNotice" hidden>
+        <div class="updateHeading"><span data-i18n="updates">Updates</span><span class="updateDot" aria-hidden="true"></span></div>
+        <div class="updateAvailableText" data-i18n="updateAvailable">Update available!</div>
+        <p class="updateInstructions" data-i18n="updateInstructions">A new version is ready. Select Update now to reload Snippy. Your saved data will remain on this device.</p>
+        <button class="btn primary" id="updateNow" type="button" data-i18n="updateNow">Update now</button>
+      </div>
      <label for="sourceLanguage" data-i18n="sourceLanguage">Source language</label>
      <div class="selectWrap"><select id="sourceLanguage" class="settingsSelect"></select></div>
      <p data-i18n="sourceHelp" style="color:var(--sub);font-size:12px;line-height:1.45;margin:7px 0 16px">Automatic detection is the default. If a snippet is too short to identify reliably, choose its source language here.</p>
@@ -292,6 +303,8 @@ const RECENT_TARGET_LANGUAGES_KEY = 'snippetMenu.translation.recent.target.v1';
 const RECENT_SOURCE_LANGUAGES_KEY = 'snippetMenu.translation.recent.source.v1';
 const RECENT_LANGUAGE_LIMIT = 5;
 const SETTINGS_NOTICE_KEY = 'snippetMenu.settingsNoticeSeen.v1';
+// Muss mit CACHE_NAME in sw.js synchron bleiben.
+const APP_VERSION = 'snippet-makro-v22';
 const LANGUAGES = [
   ['ar','Arabic'],['bg','Bulgarian'],['bn','Bengali'],['cs','Czech'],['da','Danish'],['de','German'],['el','Greek'],['en','English'],['es','Spanish'],['fi','Finnish'],['fr','French'],['he','Hebrew'],['hi','Hindi'],['hr','Croatian'],['hu','Hungarian'],['id','Indonesian'],['it','Italian'],['ja','Japanese'],['kn','Kannada'],['ko','Korean'],['lt','Lithuanian'],['mr','Marathi'],['nl','Dutch'],['no','Norwegian'],['pl','Polish'],['pt','Portuguese'],['ro','Romanian'],['ru','Russian'],['sk','Slovak'],['sl','Slovenian'],['sv','Swedish'],['ta','Tamil'],['te','Telugu'],['th','Thai'],['tr','Turkish'],['uk','Ukrainian'],['vi','Vietnamese'],['zh','Chinese'],['zh-Hant','Chinese (Traditional)']
 ];
@@ -310,6 +323,14 @@ UI_TEXT.de.appTitle='Snippy';
 UI_TEXT.de.floatTitle='Snippy';
 UI_TEXT.de.helpTitle='So funktioniert Snippy';
 UI_TEXT.en.clearSearch='Clear search';
+UI_TEXT.en.updates='Updates';
+UI_TEXT.de.updates='Aktualisierungen';
+UI_TEXT.en.updateAvailable='Update available!';
+UI_TEXT.de.updateAvailable='Update verfügbar!';
+UI_TEXT.en.updateInstructions='A new version is ready. Select Update now to reload Snippy. Your saved data will remain on this device.';
+UI_TEXT.de.updateInstructions='Eine neue Version ist verfügbar. Wähle „Jetzt aktualisieren“, um Snippy neu zu laden. Deine gespeicherten Daten bleiben auf diesem Gerät erhalten.';
+UI_TEXT.en.updateNow='Update now';
+UI_TEXT.de.updateNow='Jetzt aktualisieren';
 UI_TEXT.en.targetTitle='Choose a target language to translate snippets, or select “No translation” to copy the original. Memos are never translated.';
 UI_TEXT.en.noTranslation='No translation';
 UI_TEXT.de.noTranslation='Keine Übersetzung';
@@ -830,6 +851,7 @@ document.getElementById('btnSettingsHelp').addEventListener('click',()=>{
 });
 document.getElementById('settingsClose').addEventListener('click',()=>document.getElementById('settingsOv').classList.remove('show'));
 document.getElementById('settingsOv').addEventListener('click',event=>{ if(event.target.id==='settingsOv') event.currentTarget.classList.remove('show'); });
+document.getElementById('updateNow').addEventListener('click',()=>window.location.reload());
 document.getElementById('translationClose').addEventListener('click',()=>document.getElementById('translationOv').classList.remove('show'));
 document.getElementById('translationOv').addEventListener('click',event=>{ if(event.target.id==='translationOv') event.currentTarget.classList.remove('show'); });
 document.getElementById('translationCopy').addEventListener('click',async()=>{
@@ -1089,11 +1111,49 @@ installButton.addEventListener('click', async ()=>{
   }
 });
 
+function showUpdateAvailable(){
+  document.getElementById('btnSettings').classList.add('hasUpdate');
+  document.getElementById('updateNotice').hidden=false;
+}
+function checkWorkerVersion(worker){
+  if(!worker||typeof MessageChannel==='undefined') return Promise.resolve(false);
+  return new Promise(resolve=>{
+    const channel=new MessageChannel();
+    const timeout=setTimeout(()=>{ channel.port1.close(); resolve(false); },1500);
+    channel.port1.onmessage=event=>{
+      clearTimeout(timeout); channel.port1.close();
+      const available=!!(event.data&&event.data.version&&event.data.version!==APP_VERSION);
+      if(available) showUpdateAvailable();
+      resolve(available);
+    };
+    try{ worker.postMessage({type:'GET_VERSION'},[channel.port2]); }
+    catch(error){ clearTimeout(timeout); channel.port1.close(); resolve(false); }
+  });
+}
+function monitorAppUpdates(registration){
+  const check=async()=>{
+    await checkWorkerVersion(navigator.serviceWorker.controller||registration.active);
+    try{ await registration.update(); }catch(error){}
+    await checkWorkerVersion(navigator.serviceWorker.controller||registration.active);
+  };
+  registration.addEventListener('updatefound',()=>{
+    const installing=registration.installing;
+    if(installing) installing.addEventListener('statechange',()=>{
+      if(installing.state==='activated') checkWorkerVersion(installing);
+    });
+  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>checkWorkerVersion(registration.active||navigator.serviceWorker.controller));
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
+  setInterval(()=>{ if(!document.hidden) check(); },4*60*60*1000);
+  check();
+}
+
 if('serviceWorker' in navigator){
   window.addEventListener('load', async ()=>{
     try{
-      await navigator.serviceWorker.register('./sw.js');
+      const registration=await navigator.serviceWorker.register('./sw.js');
       await navigator.serviceWorker.ready;
+      monitorAppUpdates(registration);
     }catch(_){}
   });
 }
