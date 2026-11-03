@@ -49,6 +49,22 @@
  .languageBar::after,.selectWrap::after{content:"";position:absolute;right:13px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(45deg);pointer-events:none}
  .languageBar select,.settingsSelect{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:8px 36px 8px 11px;font:inherit;outline:none}
  .languageBar select:focus{border-color:var(--accent)}
+ .translationModelStatus{display:flex;align-items:flex-start;gap:12px;margin:0 14px 10px;padding:12px;border:1px solid rgba(255,190,92,.45);border-radius:12px;background:rgba(255,190,92,.09);color:var(--text)}
+ .translationModelStatus[hidden],.translationProgress[hidden]{display:none}
+ .translationModelStatus[data-state="ready"]{border-color:rgba(67,209,122,.5);background:rgba(67,209,122,.1)}
+ .translationModelStatus[data-state="error"]{border-color:rgba(255,122,107,.55);background:rgba(255,122,107,.1)}
+ .translationModelIcon{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:10px;background:rgba(255,190,92,.16);color:#ffd28a;font-size:19px;font-weight:800}
+ .translationModelStatus[data-state="ready"] .translationModelIcon{background:rgba(67,209,122,.16);color:#72e69b}
+ .translationModelStatus[data-state="error"] .translationModelIcon{background:rgba(255,122,107,.16);color:#ff9b8f}
+ .translationModelContent{min-width:0;flex:1}
+ .translationModelTitle{font-size:14px;font-weight:750;line-height:1.3}
+ .translationModelBody{margin-top:3px;color:var(--sub);font-size:12px;line-height:1.45}
+ .translationProgress{height:7px;margin-top:9px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.1)}
+ .translationProgress>span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f4bd63,#ffe0a6);transition:width .2s ease}
+ .translationProgress>span.indeterminate{width:36%;animation:modelProgress 1.1s ease-in-out infinite alternate}
+ .translationProgressText{display:block;margin-top:4px;color:#f1d8ae;font-size:11px;font-weight:650}
+ .translationModelStatus[data-state="ready"] .translationProgressText{color:#9ce9b6}
+ @keyframes modelProgress{from{transform:translateX(-15%)}to{transform:translateX(190%)}}
  .selectWrap{position:relative;width:100%}
  .settingsSelect:focus{border-color:var(--accent)}
  .list{overflow-y:auto;padding:2px 10px 12px}
@@ -179,6 +195,10 @@
    </div>
    <div class="search"><input id="search" data-i18n-placeholder="search" type="text" placeholder="Search snippets…" spellcheck="false"><button class="searchClear" id="searchClear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button></div>
    <div class="languageBar"><select id="targetLanguage" data-i18n-title="targetTitle" data-i18n-aria="target" title="Choose a translation language; leave unchanged to copy the original" aria-label="Translate to"></select></div>
+   <div class="translationModelStatus" id="translationModelStatus" role="status" aria-live="polite" hidden>
+     <span class="translationModelIcon" id="translationModelIcon" aria-hidden="true">↓</span>
+     <div class="translationModelContent"><div class="translationModelTitle" id="translationModelTitle"></div><div class="translationModelBody" id="translationModelBody"></div><div class="translationProgress" id="translationProgress" role="progressbar" aria-label="Language model download progress" aria-valuemin="0" aria-valuemax="100" hidden><span id="translationProgressBar"></span></div><span class="translationProgressText" id="translationProgressText"></span></div>
+   </div>
    <div class="list" id="list"></div>
  <div class="foot" data-i18n="footer">Click a snippet to copy it. Choose a target language to translate and copy. Memos are never translated.</div>
  </div>
@@ -308,8 +328,8 @@ const RECENT_SOURCE_LANGUAGES_KEY = 'snippetMenu.translation.recent.source.v1';
 const RECENT_LANGUAGE_LIMIT = 5;
 const SETTINGS_NOTICE_KEY = 'snippetMenu.settingsNoticeSeen.v1';
 // Muss mit CACHE_NAME in sw.js synchron bleiben.
-const APP_VERSION = 'snippet-makro-v24';
-const APP_RELEASE_AT = '23.10.2026 11:57';
+const APP_VERSION = 'snippet-makro-v25';
+const APP_RELEASE_AT = '03.11.2026 15:49';
 const LANGUAGES = [
   ['ar','Arabic'],['bg','Bulgarian'],['bn','Bengali'],['cs','Czech'],['da','Danish'],['de','German'],['el','Greek'],['en','English'],['es','Spanish'],['fi','Finnish'],['fr','French'],['he','Hebrew'],['hi','Hindi'],['hr','Croatian'],['hu','Hungarian'],['id','Indonesian'],['it','Italian'],['ja','Japanese'],['kn','Kannada'],['ko','Korean'],['lt','Lithuanian'],['mr','Marathi'],['nl','Dutch'],['no','Norwegian'],['pl','Polish'],['pt','Portuguese'],['ro','Romanian'],['ru','Russian'],['sk','Slovak'],['sl','Slovenian'],['sv','Swedish'],['ta','Tamil'],['te','Telugu'],['th','Thai'],['tr','Turkish'],['uk','Ukrainian'],['vi','Vietnamese'],['zh','Chinese'],['zh-Hant','Chinese (Traditional)']
 ];
@@ -338,6 +358,22 @@ UI_TEXT.en.updateInstructions='A new version is ready. Select Update now to relo
 UI_TEXT.de.updateInstructions='Eine neue Version ist verfügbar. Wähle „Jetzt aktualisieren“, um Snippy neu zu laden. Deine gespeicherten Daten bleiben auf diesem Gerät erhalten.';
 UI_TEXT.en.updateNow='Update now';
 UI_TEXT.de.updateNow='Jetzt aktualisieren';
+UI_TEXT.en.modelSetupTitle='Getting {language} ready';
+UI_TEXT.en.modelSetupBody='The language model for {language} may not be on this PC yet. If needed, the browser will download it once. This can take a moment. Keep Snippy open and connected to the internet.';
+UI_TEXT.en.modelDownloadWaiting='Preparing the {language} language model…';
+UI_TEXT.en.modelDownloadProgress='Downloading the {language} language model on this PC — {percent}%';
+UI_TEXT.en.modelReadyTitle='{language} is ready on this PC!';
+UI_TEXT.en.modelReadyBody='The language model is ready. Future translations to {language} can run on this device without another download.';
+UI_TEXT.en.modelErrorTitle='Could not prepare {language}';
+UI_TEXT.en.modelErrorBody='The language model could not be downloaded. Check the internet connection and try again.';
+UI_TEXT.de.modelSetupTitle='{language} wird eingerichtet';
+UI_TEXT.de.modelSetupBody='Das Sprachmodell für {language} ist möglicherweise noch nicht auf diesem PC. Falls nötig, lädt der Browser es einmalig herunter. Das kann einen Moment dauern. Snippy geöffnet und mit dem Internet verbunden lassen.';
+UI_TEXT.de.modelDownloadWaiting='Sprachmodell für {language} wird vorbereitet …';
+UI_TEXT.de.modelDownloadProgress='Sprachmodell für {language} wird auf diesen PC geladen — {percent} %';
+UI_TEXT.de.modelReadyTitle='{language} ist auf diesem PC bereit!';
+UI_TEXT.de.modelReadyBody='Das Sprachmodell ist bereit. Künftige Übersetzungen nach {language} funktionieren auf diesem Gerät ohne erneuten Download.';
+UI_TEXT.de.modelErrorTitle='{language} konnte nicht eingerichtet werden';
+UI_TEXT.de.modelErrorBody='Das Sprachmodell konnte nicht heruntergeladen werden. Bitte Internetverbindung prüfen und erneut versuchen.';
 UI_TEXT.en.targetTitle='Choose a target language to translate snippets, or select “No translation” to copy the original. Memos are never translated.';
 UI_TEXT.en.noTranslation='No translation';
 UI_TEXT.de.noTranslation='Keine Übersetzung';
@@ -513,11 +549,11 @@ function macroHtml(text){
   const source=String(text); let html='', last=0;
   for(const match of source.matchAll(LINK_PATTERN)){
     const [whole,label,url]=match; const start=match.index;
-    html+=escapeHtml(source.slice(last,start)).replace(/\r?\n/g,'<br>');
-    html+=`<a href="${escapeHtml(url)}">${escapeHtml(label)}</a>`;
+    html+=escapeHtml(source.slice(last,start)).replace(/\r\n|\r|\n/g,'<br>');
+    html+=`<a href="${escapeHtml(url)}">${escapeHtml(label).replace(/\r\n|\r|\n/g,'<br>')}</a>`;
     last=start+whole.length;
   }
-  return html+escapeHtml(source.slice(last)).replace(/\r?\n/g,'<br>');
+  return html+escapeHtml(source.slice(last)).replace(/\r\n|\r|\n/g,'<br>');
 }
 async function copyMacroText(text,targetWindow=window){
   const targetNavigator=targetWindow.navigator||navigator;
@@ -555,6 +591,82 @@ function beginTranslatedClipboardWrite(text,language,onProgress=()=>{},targetWin
   }catch(error){ rejectTranslation(error); return null; }
 }
 
+function hideTranslationModelStatus(targetWindow=window){
+  try{
+    const box=targetWindow.document.getElementById('translationModelStatus');
+    if(box){ clearTimeout(box.hideTimer); box.hidden=true; }
+  }catch(e){}
+}
+function setTranslationModelStatus(state,language,percent=null,targetWindow=window){
+  try{
+    const doc=targetWindow.document;
+    const box=doc.getElementById('translationModelStatus');
+    if(!box) return;
+    clearTimeout(box.hideTimer);
+    box.hidden=false;
+    box.dataset.state=state;
+    const icon=doc.getElementById('translationModelIcon');
+    const title=doc.getElementById('translationModelTitle');
+    const body=doc.getElementById('translationModelBody');
+    const progress=doc.getElementById('translationProgress');
+    const bar=doc.getElementById('translationProgressBar');
+    const progressText=doc.getElementById('translationProgressText');
+    if(state==='loading'){
+      icon.textContent='↓';
+      title.textContent=t('modelSetupTitle',{language:languageName(language)});
+      body.textContent=t('modelSetupBody',{language:languageName(language)});
+      progress.hidden=false;
+      bar.classList.toggle('indeterminate',percent===null);
+      bar.style.width=percent===null?'36%':`${percent}%`;
+      if(percent===null) progress.removeAttribute('aria-valuenow');
+      else progress.setAttribute('aria-valuenow',String(percent));
+      progressText.textContent=percent===null
+        ? t('modelDownloadWaiting',{language:languageName(language)})
+        : t('modelDownloadProgress',{language:languageName(language),percent});
+      return;
+    }
+    progress.hidden=true;
+    progressText.textContent='';
+    if(state==='ready'){
+      icon.textContent='✓';
+      title.textContent=t('modelReadyTitle',{language:languageName(language)});
+      body.textContent=t('modelReadyBody',{language:languageName(language)});
+    }else{
+      icon.textContent='!';
+      title.textContent=t('modelErrorTitle',{language:languageName(language)});
+      body.textContent=t('modelErrorBody',{language:languageName(language)});
+    }
+    box.hideTimer=setTimeout(()=>{ box.hidden=true; },8000);
+  }catch(e){}
+}
+function downloadProgressPercent(event){
+  const loaded=Number(event&&event.loaded);
+  const total=Number(event&&event.total);
+  if(!Number.isFinite(loaded)) return null;
+  const fraction=Number.isFinite(total)&&total>0?loaded/total:(loaded>=0&&loaded<=1?loaded:NaN);
+  return Number.isFinite(fraction)?Math.max(0,Math.min(100,Math.round(fraction*100))):null;
+}
+async function translatePreservingLineBreaks(segment,translateLine){
+  const parts=String(segment).split(/(\r\n|\r|\n)/);
+  const translated=[];
+  for(const part of parts){
+    if(/^(?:\r\n|\r|\n)$/.test(part)||!part.trim()){
+      translated.push(part);
+      continue;
+    }
+    const leading=part.match(/^[^\S\r\n]*/)[0];
+    const trailing=part.match(/[^\S\r\n]*$/)[0];
+    const content=part.slice(leading.length,part.length-trailing.length);
+    if(!content){ translated.push(part); continue; }
+    const marker=(content.match(/^(?:[-*+•‣▪◦>]\s+|\d+[.)]\s+|[A-Za-z][.)]\s+)/)||[''])[0];
+    const textToTranslate=content.slice(marker.length);
+    if(!textToTranslate.trim()){ translated.push(part); continue; }
+    const result=await translateLine(textToTranslate);
+    translated.push(leading+marker+String(result).replace(/\r\n|\r|\n/g,' ').trim()+trailing);
+  }
+  return translated.join('');
+}
+
 async function translateMacroText(text,language,onProgress=()=>{},targetWindow=window){
   const TranslatorApi=targetWindow.Translator||window.Translator;
   if(!TranslatorApi) throw new Error(t('translatorUnavailable'));
@@ -584,24 +696,34 @@ async function translateMacroText(text,language,onProgress=()=>{},targetWindow=w
   const availability=await TranslatorApi.availability({sourceLanguage,targetLanguage:language});
   if(availability==='unavailable') throw new Error(t('languageUnavailable'));
   onProgress(t('translationPreparing'));
-  const session=await TranslatorApi.create({
-    sourceLanguage,
-    targetLanguage:language,
-    monitor(m){
-      m.addEventListener('downloadprogress',event=>{
-        const percent=event.total?Math.round(event.loaded/event.total*100):0;
-        onProgress(t('downloadModel',{percent}));
-      });
-    }
-  });
+  let modelStatusShown=availability==='downloadable'||availability==='downloading';
+  if(modelStatusShown) setTranslationModelStatus('loading',language,null,targetWindow);
+  let session;
+  try{
+    session=await TranslatorApi.create({
+      sourceLanguage,
+      targetLanguage:language,
+      monitor(m){
+        m.addEventListener('downloadprogress',event=>{
+          modelStatusShown=true;
+          setTranslationModelStatus('loading',language,downloadProgressPercent(event),targetWindow);
+        });
+      }
+    });
+    if(modelStatusShown) setTranslationModelStatus('ready',language,null,targetWindow);
+  }catch(error){
+    if(modelStatusShown) setTranslationModelStatus('error',language,null,targetWindow);
+    throw error;
+  }
   try{
     async function translateSegment(segment){
-      if(!segment) return '';
-      const result=await session.translate(segment);
-      if(typeof result!=='string'||!result.trim()) throw new Error(t('emptyTranslation'));
-      const badToken=result.match(/\bTM-(?:[A-Z0-9]{3,}-){2,}[A-Z0-9]{3,}\b/i);
-      if(badToken&&!segment.includes(badToken[0])) throw new Error(t('badTranslation'));
-      return result;
+      return translatePreservingLineBreaks(segment,async line=>{
+        const result=await session.translate(line);
+        if(typeof result!=='string'||!result.trim()) throw new Error(t('emptyTranslation'));
+        const badToken=result.match(/\bTM-(?:[A-Z0-9]{3,}-){2,}[A-Z0-9]{3,}\b/i);
+        if(badToken&&!line.includes(badToken[0])) throw new Error(t('badTranslation'));
+        return result;
+      });
     }
     const source=String(text); let translated='', last=0;
     for(const match of source.matchAll(LINK_PATTERN)){
@@ -632,6 +754,7 @@ function showTranslationFallback(text,targetWindow=window){
 
 async function copyOrTranslate(text,targetWindow=window){
   const report=(message,ok)=>targetWindow===window?toast(message,ok):setFloatingStatus(message,ok);
+  hideTranslationModelStatus(targetWindow);
   if(!targetLanguage){
     const ok=await copyMacroText(text,targetWindow);
     report(targetWindow===window?(ok?t('copyDone'):t('copyFailed')):(ok?t('snippetCopied'):t('copyFailed')),ok);
@@ -1046,6 +1169,7 @@ async function openFloatingWindow(){
       .floatPanel{min-height:0;display:flex;flex-direction:column;flex:1}.floatSearchWrap{position:relative;margin-bottom:7px}.floatSearch{width:100%;background:#12151b;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 36px 9px 11px;font:13px inherit;outline:none}.floatSearch:focus{border-color:var(--accent)}
       .floatSearchClear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:23px;height:23px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--sub);font-size:18px;line-height:1;font-family:inherit;cursor:pointer}.floatSearchClear:hover{background:var(--card);color:var(--text)}.floatSearchClear[hidden]{display:none}
       .floatLanguageBar{position:relative;margin-bottom:7px;color:var(--sub);font-size:11.5px}.floatLanguageBar::after{content:"";position:absolute;right:12px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(45deg);pointer-events:none}.floatLanguage{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:#12151b;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:7px 34px 7px 9px;font:inherit;outline:none}
+      .translationModelStatus{display:flex;align-items:flex-start;gap:10px;margin:0 0 8px;padding:10px;border:1px solid rgba(255,190,92,.45);border-radius:11px;background:rgba(255,190,92,.09);color:var(--text)}.translationModelStatus[hidden],.translationProgress[hidden]{display:none}.translationModelStatus[data-state="ready"]{border-color:rgba(67,209,122,.5);background:rgba(67,209,122,.1)}.translationModelStatus[data-state="error"]{border-color:rgba(255,122,107,.55);background:rgba(255,122,107,.1)}.translationModelIcon{width:30px;height:30px;display:grid;place-items:center;flex:none;border-radius:9px;background:rgba(255,190,92,.16);color:#ffd28a;font-size:18px;font-weight:800}.translationModelStatus[data-state="ready"] .translationModelIcon{background:rgba(67,209,122,.16);color:#72e69b}.translationModelStatus[data-state="error"] .translationModelIcon{background:rgba(255,122,107,.16);color:#ff9b8f}.translationModelContent{min-width:0;flex:1}.translationModelTitle{font-size:13px;font-weight:750;line-height:1.3}.translationModelBody{margin-top:3px;color:var(--sub);font-size:11px;line-height:1.4}.translationProgress{height:6px;margin-top:8px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.1)}.translationProgress>span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f4bd63,#ffe0a6);transition:width .2s ease}.translationProgress>span.indeterminate{width:36%;animation:modelProgress 1.1s ease-in-out infinite alternate}.translationProgressText{display:block;margin-top:4px;color:#f1d8ae;font-size:10px;font-weight:650}.translationModelStatus[data-state="ready"] .translationProgressText{color:#9ce9b6}@keyframes modelProgress{from{transform:translateX(-15%)}to{transform:translateX(190%)}}
       .floatList{min-height:0;overflow-y:auto;padding:0 1px 7px}.floatList::-webkit-scrollbar{width:9px}.floatList::-webkit-scrollbar-thumb{background:#3a4150;border-radius:6px;border:2px solid var(--bg)}
       .floatGroup{margin:8px 4px 2px}.floatFolder{width:100%;display:flex;align-items:center;gap:8px;border:0;border-radius:10px;background:var(--fold);color:var(--foldt);padding:9px 12px;text-align:left;font:600 14px inherit;cursor:pointer}.floatFolder:hover{filter:brightness(1.08)}.floatFolderArrow{width:12px;font-size:12px}.floatGroupItems{padding-top:1px}.floatGroupItems[hidden]{display:none}.floatGroupItems .floatRow{margin-left:16px}
       .floatRow{display:flex;align-items:stretch;background:var(--card);border:1px solid transparent;border-radius:11px;overflow:hidden;margin:6px 4px}.floatRow:hover,.floatRow.alt:hover{background:var(--cardh)}.floatRow.alt{background:var(--cardAlt)}.floatRow.alt .floatAccent{background:linear-gradient(#4fe0ff,#5aa2ff)}button{font-family:inherit}
@@ -1055,7 +1179,7 @@ async function openFloatingWindow(){
       .floatCopyOverlay{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:12px}.floatCopyOverlay[hidden]{display:none}.floatCopyCard{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px;box-shadow:0 18px 40px rgba(0,0,0,.5)}.floatCopyCard h3{margin:0 0 8px;font-size:14px}.floatCopyCard textarea{width:100%;height:150px;resize:vertical;background:#12151b;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:12px/1.45 'Cascadia Mono',Consolas,monospace}.floatCopyActs{display:flex;gap:7px;margin-top:9px}.floatCopyActs button{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px;background:#20242e;color:var(--text);cursor:pointer}.floatCopyActs .floatCopyPrimary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#08101e;font-weight:700}
     `;
     pip.document.head.appendChild(style);
-    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><div class="floatHeadText"><span class="floatTitle" id="floatTitle"></span><span class="floatHint" id="floatHint"></span></div></div><section class="floatPanel" id="floatPanel"><div class="floatSearchWrap"><input class="floatSearch" id="floatSearch" type="text" spellcheck="false"><button class="floatSearchClear" id="floatSearchClear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button></div><div class="floatLanguageBar"><select class="floatLanguage" id="floatLanguage"></select></div><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div><div class="floatCopyOverlay" id="floatCopyOverlay" hidden><div class="floatCopyCard"><h3 id="floatCopyTitle"></h3><textarea id="floatCopyText" readonly spellcheck="false"></textarea><div class="floatCopyActs"><button class="floatCopyPrimary" id="floatCopyButton" type="button"></button><button id="floatCopyClose" type="button"></button></div></div></div></main>';
+    pip.document.body.innerHTML='<main class="floatShell"><div class="floatHead"><div class="floatHeadText"><span class="floatTitle" id="floatTitle"></span><span class="floatHint" id="floatHint"></span></div></div><section class="floatPanel" id="floatPanel"><div class="floatSearchWrap"><input class="floatSearch" id="floatSearch" type="text" spellcheck="false"><button class="floatSearchClear" id="floatSearchClear" type="button" aria-label="Clear search" title="Clear search" hidden>×</button></div><div class="floatLanguageBar"><select class="floatLanguage" id="floatLanguage"></select></div><div class="translationModelStatus" id="translationModelStatus" role="status" aria-live="polite" hidden><span class="translationModelIcon" id="translationModelIcon" aria-hidden="true">↓</span><div class="translationModelContent"><div class="translationModelTitle" id="translationModelTitle"></div><div class="translationModelBody" id="translationModelBody"></div><div class="translationProgress" id="translationProgress" role="progressbar" aria-label="Language model download progress" aria-valuemin="0" aria-valuemax="100" hidden><span id="translationProgressBar"></span></div><span class="translationProgressText" id="translationProgressText"></span></div></div><div class="floatList" id="floatList"></div></section><div class="floatStatus" id="floatStatus"></div><div class="floatCopyOverlay" id="floatCopyOverlay" hidden><div class="floatCopyCard"><h3 id="floatCopyTitle"></h3><textarea id="floatCopyText" readonly spellcheck="false"></textarea><div class="floatCopyActs"><button class="floatCopyPrimary" id="floatCopyButton" type="button"></button><button id="floatCopyClose" type="button"></button></div></div></div></main>';
     const floatingLanguage=pip.document.getElementById('floatLanguage');
     floatingLanguage.addEventListener('change',()=>setTargetLanguage(floatingLanguage.value));
     applyFloatingLanguage();

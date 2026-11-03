@@ -1,5 +1,5 @@
-const CACHE_NAME = 'snippet-makro-v24';
-const RELEASED_AT = '23.10.2026 11:57';
+const CACHE_NAME = 'snippet-makro-v25';
+const RELEASED_AT = '03.11.2026 15:49';
 const APP_SHELL = [
   './',
   './index.html',
